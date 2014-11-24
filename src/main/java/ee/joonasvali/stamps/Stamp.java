@@ -49,7 +49,6 @@ public class Stamp {
   public Projection getProjection(Color color) {
     BufferedImage image = renders.get(color);
     if (image == null) {
-      System.out.println("creating for " + color);
       image = factory.getRawProjection(img, color);
       renders.put(color, image);
     }

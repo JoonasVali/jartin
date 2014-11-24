@@ -2,53 +2,65 @@ package ee.joonasvali.stamps;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
 public class Main {
+  static Stamps stamps = new Stamps(new File(Main.class.getResource("/stamps").getFile()));
   public static void main(String[] args) {
 
-    Stamps stamps = new Stamps(new File(Main.class.getResource("/stamps").getFile()));
+    BufferedImage canvas = init(stamps);
+    JFrame frame = new JFrame("LOL");
+    frame.getContentPane().add(new JLabel(new ImageIcon(canvas)));
+    frame.pack();
+    frame.addKeyListener(new KeyListener() {
+      @Override
+      public void keyTyped(KeyEvent e) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+
+      @Override
+      public void keyPressed(KeyEvent e) {
+        //To change body of implemented methods use File | Settings | File Templates.
+      }
+
+      @Override
+      public void keyReleased(KeyEvent e) {
+        if(KeyEvent.VK_SPACE == e.getKeyCode()) {
+          BufferedImage img = init(stamps);
+          frame.getContentPane().removeAll();
+          frame.getContentPane().add(new JLabel(new ImageIcon(img)));
+          frame.pack();
+        }
+      }
+    });
+    frame.setVisible(true);
+    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+  }
+
+  private static BufferedImage init(Stamps stamps) {
+    int x = 1300;
+    int y = 600;
+    StampPallette stampPallette = new StampPallette(stamps, 8);
     RandomQuery<Stamp> ran = new RandomQuery<>();
     RandomQuery<Color> ranColor = new RandomQuery<>();
     Pallette pallette = new Pallette(3);
 
-    DefaultProjection img1 = (DefaultProjection) stamps.getStamp(ran).getProjection(pallette.getColor(ranColor));
-    DefaultProjection img2 = (DefaultProjection) stamps.getStamp(ran).getProjection(pallette.getColor(ranColor));
-    DefaultProjection img3 = (DefaultProjection) stamps.getStamp(ran).getProjection(pallette.getColor(ranColor));
-    DefaultProjection img4 = (DefaultProjection) stamps.getStamp(ran).getProjection(pallette.getColor(ranColor));
+    ProjectionGenerator gen = new ProjectionGenerator(x, y, stampPallette, pallette);
 
-    Painting painting = new Painting(500, 500);
+    Painting painting = new Painting(x, y);
     JFrame frame = new JFrame("LOL");
 
-
-
-    img1.setRotation((int) (Math.random() * 360));
-    img2.setRotation((int) (Math.random() * 360));
-    img3.setRotation((int) (Math.random() * 360));
-    img4.setRotation((int) (Math.random() * 360));
-
-    img1.setX(150);
-    img2.setX(160);
-    img3.setX(170);
-    img4.setX(180);
-
-    img1.setY(150);
-    img2.setY(160);
-    img3.setY(170);
-    img4.setY(180);
-
-    painting.addProjection(img1);
-    painting.addProjection(img2);
-    painting.addProjection(img3);
-    painting.addProjection(img4);
+    int projections = (int) (x * y / 350d);
+    for (int i = 0; i < projections; i++) {
+      painting.addProjection(gen.generate());
+    }
 
     BufferedImage canvas = painting.getImage();
-
-    frame.getContentPane().add(new JLabel(new ImageIcon(canvas)));
-    frame.pack();
-    frame.setVisible(true);
-    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    return canvas;
 
   }
 }

@@ -9,6 +9,7 @@ public class DefaultProjection implements Projection {
   private BufferedImage img;
   private int x;
   private int y;
+  private double scale;
   private int rotation;
 
   public DefaultProjection(BufferedImage img) {
@@ -35,6 +36,14 @@ public class DefaultProjection implements Projection {
     return y;
   }
 
+  public double getScale() {
+    return scale;
+  }
+
+  public void setScale(double scale) {
+    this.scale = scale;
+  }
+
   public void setY(int y) {
     this.y = y;
   }
@@ -52,6 +61,7 @@ public class DefaultProjection implements Projection {
     Graphics2D g2 = (Graphics2D)img.getGraphics();
     AffineTransform at = new AffineTransform();
     at.setToTranslation(x, y);
+    at.scale(scale, scale);
     at.rotate(Math.toRadians(rotation), img.getWidth()/2, img.getHeight()/2);
     g1.drawImage(img, at, null);
   }
