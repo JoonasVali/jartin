@@ -1,0 +1,29 @@
+syntax: glob
+.*.swp
+
+personal.properties
+Test Results - ToolbarTests.html
+syntax: regexp
+^.idea$
+^out$
+^target$
+^build$
+^dist$
+^tests$
+^etc/priv.der$
+^.settings/org.eclipse.jdt.core.prefs$
+^.*iml$
+^.*orig$
+syntax: regexp
+^\.settings/org\.maven\.ide\.eclipse\.prefs$
+syntax: regexp
+^\.ant-targets-build\.xml$
+syntax: regexp
+^buildAndDeploy\.sh$
+
+syntax: regexp
+^\.project$
+syntax: regexp
+^\.settings$
+syntax: regexp
+^lib$
