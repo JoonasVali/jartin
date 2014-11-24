@@ -10,21 +10,23 @@ public class Main {
 
     Stamps stamps = new Stamps(new File(Main.class.getResource("/stamps").getFile()));
     RandomQuery<Stamp> ran = new RandomQuery<>();
+    RandomQuery<Color> ranColor = new RandomQuery<>();
+    Pallette pallette = new Pallette(3);
 
-    DefaultProjection img1 = (DefaultProjection) stamps.getStamp(ran).getProjection(new Color(100, 150, 10));
-    DefaultProjection img2 = (DefaultProjection) stamps.getStamp(ran).getProjection(new Color(120, 170, 50));
-    DefaultProjection img3 = (DefaultProjection) stamps.getStamp(ran).getProjection(new Color(100, 200, 20));
-    DefaultProjection img4 = (DefaultProjection) stamps.getStamp(ran).getProjection(new Color(100, 150, 10));
+    DefaultProjection img1 = (DefaultProjection) stamps.getStamp(ran).getProjection(pallette.getColor(ranColor));
+    DefaultProjection img2 = (DefaultProjection) stamps.getStamp(ran).getProjection(pallette.getColor(ranColor));
+    DefaultProjection img3 = (DefaultProjection) stamps.getStamp(ran).getProjection(pallette.getColor(ranColor));
+    DefaultProjection img4 = (DefaultProjection) stamps.getStamp(ran).getProjection(pallette.getColor(ranColor));
 
     Painting painting = new Painting(500, 500);
     JFrame frame = new JFrame("LOL");
 
 
 
-    img1.setRotation(200);
-    img2.setRotation(210);
-    img3.setRotation(230);
-    img4.setRotation(300);
+    img1.setRotation((int) (Math.random() * 360));
+    img2.setRotation((int) (Math.random() * 360));
+    img3.setRotation((int) (Math.random() * 360));
+    img4.setRotation((int) (Math.random() * 360));
 
     img1.setX(150);
     img2.setX(160);
