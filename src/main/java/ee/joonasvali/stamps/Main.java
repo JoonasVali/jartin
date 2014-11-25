@@ -29,6 +29,7 @@ public class Main {
       @Override
       public void keyReleased(KeyEvent e) {
         if(KeyEvent.VK_SPACE == e.getKeyCode()) {
+          Stamp.clearCache();
           BufferedImage img = init(stamps);
           frame.getContentPane().removeAll();
           frame.getContentPane().add(new JLabel(new ImageIcon(img)));
