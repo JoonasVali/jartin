@@ -25,7 +25,7 @@ public class Stamps {
   }
 
   private void load(File file) {
-    stamps.add(new Stamp(file));
+    stamps.add(Stamp.getInstance(file));
   }
 
   public Stamp getStamp(Query<Stamp> q) {
