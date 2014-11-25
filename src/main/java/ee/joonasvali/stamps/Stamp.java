@@ -54,4 +54,8 @@ public class Stamp {
     }
     return factory.getProjectionFromRaw(image);
   }
+
+  public static void clearCache() {
+    cache.clear();
+  }
 }
