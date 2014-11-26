@@ -14,7 +14,7 @@ public class StampPallette {
     this.stampsList = new ArrayList<>(stampsList);
   }
 
-  public StampPallette(Stamps stamps, int count) {
+  public StampPallette(StampProvider stamps, int count) {
     this.stampsList = new ArrayList<>(count);
     RandomQuery<Stamp> stampRandomQuery = new RandomQuery<>();
     for (int i = 0; i < count; i++) {
