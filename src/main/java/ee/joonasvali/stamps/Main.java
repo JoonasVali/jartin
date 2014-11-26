@@ -10,21 +10,16 @@ import java.io.File;
 public class Main {
   static Stamps stamps = new Stamps(new File(Main.class.getResource("/stamps").getFile()));
   public static void main(String[] args) {
-
     BufferedImage canvas = init(stamps);
     JFrame frame = new JFrame("LOL");
     frame.getContentPane().add(new JLabel(new ImageIcon(canvas)));
     frame.pack();
     frame.addKeyListener(new KeyListener() {
       @Override
-      public void keyTyped(KeyEvent e) {
-        //To change body of implemented methods use File | Settings | File Templates.
-      }
+      public void keyTyped(KeyEvent e) { }
 
       @Override
-      public void keyPressed(KeyEvent e) {
-        //To change body of implemented methods use File | Settings | File Templates.
-      }
+      public void keyPressed(KeyEvent e) { }
 
       @Override
       public void keyReleased(KeyEvent e) {
@@ -45,7 +40,8 @@ public class Main {
   private static BufferedImage init(Stamps stamps) {
     int x = 1300;
     int y = 600;
-    StampPallette stampPallette = new StampPallette(stamps, 8);
+    CompositeStamps compositeStamps = new CompositeStamps(stamps, new RandomComposerStrategy(5));
+    StampPallette stampPallette = new StampPallette(compositeStamps, 8);
     RandomQuery<Stamp> ran = new RandomQuery<>();
     RandomQuery<Color> ranColor = new RandomQuery<>();
     Pallette pallette = new Pallette(3);

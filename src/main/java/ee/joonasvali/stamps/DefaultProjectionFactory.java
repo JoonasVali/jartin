@@ -6,6 +6,10 @@ import java.awt.image.BufferedImage;
 public class DefaultProjectionFactory implements ProjectionFactory {
   @Override
   public BufferedImage getRawProjection(BufferedImage img, Color color) {
+    return getRawProjectionImage(img, color);
+  }
+
+  public static BufferedImage getRawProjectionImage(BufferedImage img, Color color) {
     BufferedImage newImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
     for (int i = 0; i < img.getHeight(); i++) {
       for (int j = 0; j < img.getWidth(); j++) {

@@ -2,11 +2,12 @@ package ee.joonasvali.stamps;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Joonas Vali
  */
-public class Stamps {
+public class Stamps implements StampProvider{
   private File folder;
   private ArrayList<Stamp> stamps;
 
@@ -14,6 +15,10 @@ public class Stamps {
     if (!folder.exists() || !folder.isDirectory()) throw new IllegalArgumentException("Folder must be dir");
     this.folder = folder;
     loadStamps();
+  }
+
+  public Stamps(List<Stamp> stamps) {
+    this.stamps = new ArrayList<>(stamps);
   }
 
   private void loadStamps() {
@@ -28,8 +33,14 @@ public class Stamps {
     stamps.add(Stamp.getInstance(file));
   }
 
+  @Override
   public Stamp getStamp(Query<Stamp> q) {
     return q.get(stamps);
+  }
+
+
+  public List<Stamp> getStamps() {
+    return new ArrayList<>(stamps);
   }
 
 

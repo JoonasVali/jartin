@@ -3,6 +3,8 @@ package ee.joonasvali.stamps;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,6 +19,10 @@ public class Stamp {
 
   private static ProjectionFactory DEFAULT_FACTORY = new DefaultProjectionFactory();
   private static Map<String, Stamp> cache = new HashMap<>();
+
+  public Stamp(BufferedImage image) {
+    this.img = image;
+  }
 
   public synchronized static Stamp getInstance(File file) {
     String path = null;
@@ -57,5 +63,16 @@ public class Stamp {
 
   public static void clearCache() {
     cache.clear();
+  }
+
+  public BufferedImage getImg() {
+    return deepCopy(img);
+  }
+
+  private static BufferedImage deepCopy(BufferedImage bi) {
+    ColorModel cm = bi.getColorModel();
+    boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+    WritableRaster raster = bi.copyData(null);
+    return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
   }
 }
