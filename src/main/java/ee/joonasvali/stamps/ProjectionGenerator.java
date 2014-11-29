@@ -9,14 +9,14 @@ public class ProjectionGenerator {
 
   public static final int OUT_OF_SIGHT_MARGIN = 50;
 
-  StampPallette stamps;
+  Stamps stamps;
   Pallette pallette;
   Query<Stamp> stampQuery;
   Query<Color> colorQuery;
   int canvasX;
   int canvasY;
 
-  public ProjectionGenerator(int canvasX, int canvasY, StampPallette stamps, Pallette pallette) {
+  public ProjectionGenerator(int canvasX, int canvasY, Stamps stamps, Pallette pallette) {
     this.stamps = stamps;
     this.pallette = pallette;
     this.canvasX = canvasX;
@@ -26,6 +26,9 @@ public class ProjectionGenerator {
   }
 
   public Projection generate() {
+    int x = (int) (Math.random() * (canvasX + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
+    int y = (int) (Math.random() * (canvasY + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
+
     Color color = pallette.getColor(colorQuery);
     int i = (int) (Math.random() * 4 - 2);
     if(i < 0) {
@@ -37,10 +40,11 @@ public class ProjectionGenerator {
     }
 
     DefaultProjection img = (DefaultProjection) stamps.getStamp(stampQuery).getProjection(color);
-    img.setScale(1 + Math.random() - 0.6);
+    img.setScale(1 - Math.min(Math.random(), 0.7));
+
     img.setRotation((int) (Math.random() * 360));
-    img.setX((int) (Math.random() * (canvasX + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN);
-    img.setY((int) (Math.random() * (canvasY + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN);
+    img.setX(x);
+    img.setY(y);
     return img;
   }
 }

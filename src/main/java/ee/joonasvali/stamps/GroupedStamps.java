@@ -1,0 +1,97 @@
+package ee.joonasvali.stamps;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * @author Joonas Vali
+ */
+public class GroupedStamps {
+  private File mainfolder;
+  private ArrayList<Stamps> stampsGroups;
+
+  public GroupedStamps(File mainfolder) {
+    if (!mainfolder.exists() || !mainfolder.isDirectory()) throw new IllegalArgumentException("Folder must be dir");
+    this.mainfolder = mainfolder;
+    loadStamps();
+    System.out.println(stampsGroups);
+  }
+
+  private void loadStamps() {
+    File[] files = mainfolder.listFiles((dir, name) -> dir.isDirectory());
+    stampsGroups = new ArrayList<>(files.length);
+    for (File file : files) {
+      load(file);
+    }
+  }
+
+  private void load(File file) {
+    stampsGroups.add(
+        new Stamps(file)
+    );
+  }
+
+  /**
+   * @param groups
+   * @param stampsPerGroup
+   * @param groupQuery
+   * @param stampQuery
+   * @param fillGroups
+   * @return
+   */
+  public Stamps getStamps(int groups, int stampsPerGroup, Query<Stamps> groupQuery, Query<Stamp> stampQuery, boolean fillGroups) {
+    boolean remove = true;
+    if (groupQuery instanceof RandomQuery) {
+      groupQuery = getRandomRemovingQuery();
+      remove = false;
+    }
+    LinkedList<Stamps> copy = new LinkedList<>(stampsGroups);
+    List<Stamps> picked = new ArrayList<>(groups);
+    for (int i = 0; i < groups; i++) {
+      if (copy.isEmpty()) {
+        System.err.println("Ran out of stamp groups at index " + (i + 1) + ", before could pick " + groups);
+        return flatten(picked, stampsPerGroup, stampQuery, fillGroups);
+      }
+      Stamps s = groupQuery.get(copy);
+      if (remove) {
+        copy.remove(s);
+      }
+      picked.add(s);
+    }
+    return flatten(picked, stampsPerGroup, stampQuery, fillGroups);
+  }
+
+  private Stamps flatten(List<Stamps> picked, int stampsPerGroup, Query<Stamp> stampQuery, boolean fillGroups) {
+    List<Stamp> flat = new ArrayList<>(100);
+    picked.stream().forEach(s -> flat.addAll(getStamps(s.getStamps(), stampsPerGroup, stampQuery, fillGroups)));
+    return new Stamps(flat);
+  }
+
+  private Collection<? extends Stamp> getStamps(List<Stamp> stamps, int stampsPerGroup, Query<Stamp> stampQuery, boolean fillGroups) {
+    if (!fillGroups) {
+      if (stampsPerGroup >= stamps.size()) {
+        return stamps;
+      }
+    }
+    List<Stamp> result = new ArrayList<>(stampsPerGroup);
+    for (int i = 0; i < stampsPerGroup; i++) {
+      result.add(stampQuery.get(stamps));
+    }
+    return result;
+  }
+
+
+  private Query<Stamps> getRandomRemovingQuery() {
+    return list -> {
+      int i = (int) (Math.random() * list.size());
+      return list.remove(i);
+    };
+  }
+
+  public void clearCaches() {
+    stampsGroups.forEach(s -> s.getStamps().forEach(a -> a.clearRenderCache()));
+  }
+}

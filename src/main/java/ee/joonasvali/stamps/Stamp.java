@@ -75,4 +75,8 @@ public class Stamp {
     WritableRaster raster = bi.copyData(null);
     return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
   }
+
+  public void clearRenderCache() {
+    renders.clear();
+  }
 }
