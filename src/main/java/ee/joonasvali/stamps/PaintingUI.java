@@ -26,7 +26,6 @@ public class PaintingUI extends JPanel {
   static GroupedStamps stampPool = new GroupedStamps(new File(Main.class.getResource("/stamps").getFile()));
 
   public PaintingUI () {
-    lastImage = init();
     this.add(new JLabel(new ImageIcon(lastImage)));
   }
 
@@ -44,9 +43,9 @@ public class PaintingUI extends JPanel {
 
   public void onReinit() {
     clearCaches();
-    BufferedImage img = init();
+    init();
     this.removeAll();
-    this.add(new JLabel(new ImageIcon(img)));
+    this.add(new JLabel(new ImageIcon(lastImage)));
   }
 
   private void clearCaches() {
@@ -62,7 +61,7 @@ public class PaintingUI extends JPanel {
     }
   }
 
-  private BufferedImage init() {
+  private void init() {
     int x = WIDTH;
     int y = HEIGHT;
 
@@ -84,7 +83,6 @@ public class PaintingUI extends JPanel {
       painting.addProjection(gen.generate());
     }
 
-    return painting.getImage();
-
+    lastImage = painting.getImage();
   }
 }
