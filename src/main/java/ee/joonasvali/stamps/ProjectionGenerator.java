@@ -9,14 +9,14 @@ public class ProjectionGenerator {
 
   public static final int OUT_OF_SIGHT_MARGIN = 50;
 
-  Stamps stamps;
+  StampProvider stamps;
   Pallette pallette;
   Query<Stamp> stampQuery;
   Query<Color> colorQuery;
   int canvasX;
   int canvasY;
 
-  public ProjectionGenerator(int canvasX, int canvasY, Stamps stamps, Pallette pallette) {
+  public ProjectionGenerator(int canvasX, int canvasY, StampProvider stamps, Pallette pallette) {
     this.stamps = stamps;
     this.pallette = pallette;
     this.canvasX = canvasX;
