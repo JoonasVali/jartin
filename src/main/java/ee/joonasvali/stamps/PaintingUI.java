@@ -11,40 +11,67 @@ public class PaintingUI extends JPanel {
   public static final int WIDTH = 1800;
   public static final int HEIGHT = 1000;
   public static final int NUMBER_OF_COLORS = 2;
-  public static final int STAMP_COUNT_DEMULTIPLIER = 700;
+  public static final int STAMP_COUNT_DEMULTIPLIER = 1700;
   public static final int STAMP_GROUPS_COUNT = 4;
   public static final int STAMPS_PER_GROUP = 15;
+
+  public boolean retainColors = false;
+  public boolean retainStamps = false;
+
+  private Pallette pallette;
+  private Stamps stamps;
+
+  private BufferedImage lastImage;
 
   static GroupedStamps stampPool = new GroupedStamps(new File(Main.class.getResource("/stamps").getFile()));
 
   public PaintingUI () {
-    Stamps stamps = generateNewStamps();
-    BufferedImage canvas = init(stamps);
-    this.add(new JLabel(new ImageIcon(canvas)));
+    lastImage = init();
+    this.add(new JLabel(new ImageIcon(lastImage)));
+  }
+
+  public BufferedImage getLastImage() {
+    return lastImage;
+  }
+
+  public void setRetainColors(boolean retainColors) {
+    this.retainColors = retainColors;
+  }
+
+  public void setRetainStamps(boolean retainStamps) {
+    this.retainStamps = retainStamps;
   }
 
   public void onReinit() {
     clearCaches();
-    BufferedImage img = init(generateNewStamps());
+    BufferedImage img = init();
     this.removeAll();
     this.add(new JLabel(new ImageIcon(img)));
   }
 
-  private static void clearCaches() {
+  private void clearCaches() {
     Stamp.clearCache();
     stampPool.clearCaches();
   }
 
-  private static Stamps generateNewStamps() {
-    return stampPool.getStamps(STAMP_GROUPS_COUNT, STAMPS_PER_GROUP, new RandomQuery<>(), new RandomQuery<>(), false);
+  private Stamps createStamps() {
+    if (stamps == null || !retainStamps) {
+      return stampPool.getStamps(STAMP_GROUPS_COUNT, STAMPS_PER_GROUP, new RandomQuery<>(), new RandomQuery<>(), false);
+    } else {
+      return stamps;
+    }
   }
 
-  private static BufferedImage init(Stamps stamps) {
+  private BufferedImage init() {
     int x = WIDTH;
     int y = HEIGHT;
+
+    stamps = createStamps();
     CompositeStamps compositeStamps = new CompositeStamps(stamps, new RandomComposerStrategy(5));
 
-    Pallette pallette = new Pallette(NUMBER_OF_COLORS);
+    if (pallette == null || !retainColors) {
+      pallette = new Pallette(NUMBER_OF_COLORS);
+    }
 
     ProjectionGenerator gen = new ProjectionGenerator(x, y, compositeStamps, pallette);
 
@@ -57,8 +84,7 @@ public class PaintingUI extends JPanel {
       painting.addProjection(gen.generate());
     }
 
-    BufferedImage canvas = painting.getImage();
-    return canvas;
+    return painting.getImage();
 
   }
 }
