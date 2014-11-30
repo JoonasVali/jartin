@@ -26,6 +26,7 @@ public class PaintingUI extends JPanel {
   static GroupedStamps stampPool = new GroupedStamps(new File(Main.class.getResource("/stamps").getFile()));
 
   public PaintingUI () {
+    init();
     this.add(new JLabel(new ImageIcon(lastImage)));
   }
 
