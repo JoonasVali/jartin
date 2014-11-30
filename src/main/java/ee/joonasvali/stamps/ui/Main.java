@@ -53,7 +53,10 @@ public class Main {
     controlPanel.add(box2);
 
     JButton generate = new JButton("Generate");
-    generate.addActionListener(s -> ui.onReinit());
+    generate.addActionListener(s -> {
+      ui.onReinit();
+      scrollPane.revalidate();
+    });
     controlPanel.add(generate);
 
     JButton save = new JButton("Save");
