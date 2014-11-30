@@ -6,10 +6,10 @@ package ee.joonasvali.stamps.ui;
 public class Preferences {
   public static final int WIDTH = 1800;
   public static final int HEIGHT = 1000;
-  public static final int NUMBER_OF_COLORS = 3;
-  public static final int STAMP_COUNT_DEMULTIPLIER = 1700;
+  public static final int NUMBER_OF_COLORS = 2;
+  public static final int STAMP_COUNT_DEMULTIPLIER = 1500;
   public static final int STAMP_GROUPS_COUNT = 4;
-  public static final int STAMPS_PER_GROUP = 15;
+  public static final int STAMPS_PER_GROUP = 10;
 
   private int width = WIDTH;
   private int height = HEIGHT;

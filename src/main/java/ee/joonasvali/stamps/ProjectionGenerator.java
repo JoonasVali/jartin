@@ -26,11 +26,19 @@ public class ProjectionGenerator {
   }
 
   public Projection generate() {
+    Stamp stamp = stamps.getStamp(stampQuery);
+    // Defined through stamps.properties, default = 1
+    double rarity = stamp.getMetadata().getRarity();
+    if(rarity < 1 && Math.random() > rarity && rarity > 0) {
+      return generate();
+    }
+
     int x = (int) (Math.random() * (canvasX + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
     int y = (int) (Math.random() * (canvasY + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
 
     Color color = pallette.getColor(colorQuery);
-    int i = (int) (Math.random() * 4 - 2);
+    int MULTIPLIER = 2;
+    int i = (int) (Math.random() * 2 * MULTIPLIER - MULTIPLIER);
     if(i < 0) {
       for(; i < 0; i++)
         color = color.brighter();
@@ -39,7 +47,8 @@ public class ProjectionGenerator {
         color = color.darker();
     }
 
-    DefaultProjection img = (DefaultProjection) stamps.getStamp(stampQuery).getProjection(color);
+
+    DefaultProjection img = (DefaultProjection) stamp.getProjection(color);
     img.setScale(1 - Math.min(Math.random(), 0.7));
 
     img.setRotation((int) (Math.random() * 360));

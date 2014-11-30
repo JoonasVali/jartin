@@ -43,5 +43,8 @@ public class Stamps implements StampProvider{
     return new ArrayList<>(stamps);
   }
 
+  public void setMetadata(StampGroupMetadata metadata) {
+    stamps.forEach(s -> s.setMetadata(metadata));
+  }
 
 }
