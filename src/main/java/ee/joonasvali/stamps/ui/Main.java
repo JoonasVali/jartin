@@ -1,4 +1,4 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.ui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -26,13 +26,20 @@ public class Main {
   }
 
   private void run() {
-    frame = new JFrame("Art Generator (C) Joonas Vali 2014");
+    frame = new JFrame("(C) Art Generator Joonas Vali 2014");
 
     JPanel panel = new JPanel(new BorderLayout());
     frame.getContentPane().add(panel);
-    panel.add(ui, BorderLayout.CENTER);
+    JScrollPane scrollPane = new JScrollPane(ui, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    HandScrollListener scrollListener = new HandScrollListener(ui);
+    scrollPane.getViewport().addMouseMotionListener(scrollListener);
+    scrollPane.getViewport().addMouseListener(scrollListener);
+
+    panel.add(scrollPane, BorderLayout.CENTER);
     frame.setFocusable(true);
     frame.setAutoRequestFocus(true);
+
+
 
     JPanel controlPanel = new JPanel(new FlowLayout());
     JCheckBox box1 = new JCheckBox("Reuse color", false);
@@ -46,10 +53,7 @@ public class Main {
     controlPanel.add(box2);
 
     JButton generate = new JButton("Generate");
-    generate.addActionListener(s -> {
-      ui.onReinit();
-      frame.pack();
-    });
+    generate.addActionListener(s -> ui.onReinit());
     controlPanel.add(generate);
 
     JButton save = new JButton("Save");
@@ -59,6 +63,7 @@ public class Main {
 
     panel.add(controlPanel, BorderLayout.NORTH);
     frame.pack();
+    frame.setSize(new Dimension(800, 600));
     frame.setVisible(true);
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
   }
