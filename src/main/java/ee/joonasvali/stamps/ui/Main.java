@@ -26,7 +26,7 @@ public class Main {
   }
 
   private void run() {
-    frame = new JFrame("(C) Art Generator Joonas Vali 2014");
+    frame = new JFrame("(C) Jartin 1.0.alpha by Joonas Vali 2014");
 
     JPanel panel = new JPanel(new BorderLayout());
     frame.getContentPane().add(panel);
