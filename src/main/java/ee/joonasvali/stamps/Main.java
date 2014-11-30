@@ -7,14 +7,25 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 public class Main {
 
   public static final String SAVE_PATH = "C:\\Users\\Joss\\Desktop\\art\\big\\";
-  static JFrame frame;
-  static PaintingUI ui = new PaintingUI();
+  JFrame frame;
+  PaintingUI ui = new PaintingUI();
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InvocationTargetException, InterruptedException {
+    SwingUtilities.invokeAndWait(new Runnable() {
+      @Override
+      public void run() {
+        new Main().run();
+      }
+    });
+
+  }
+
+  private void run() {
     frame = new JFrame("Art Generator (C) Joonas Vali 2014");
 
     JPanel panel = new JPanel(new BorderLayout());
@@ -52,7 +63,7 @@ public class Main {
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
   }
 
-  private static void save() {
+  private void save() {
     try {
       BufferedImage bi = ui.getLastImage();
       String name = System.currentTimeMillis() + ".png";
@@ -64,11 +75,11 @@ public class Main {
     }
   }
 
-  private static ActionListener getStampsActionListener(JCheckBox box2) {
+  private ActionListener getStampsActionListener(JCheckBox box2) {
     return s -> ui.setRetainStamps(box2.isSelected());
   }
 
-  private static ActionListener getColorActionListener(JCheckBox box1) {
+  private ActionListener getColorActionListener(JCheckBox box1) {
     return s -> ui.setRetainColors(box1.isSelected());
   }
 
