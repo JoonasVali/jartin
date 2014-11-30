@@ -13,6 +13,7 @@ import java.util.Map;
 
 public class Stamp {
 
+  private StampGroupMetadata metadata = new StampGroupMetadata();
   private BufferedImage img = null;
   private HashMap<Color, BufferedImage> renders = new HashMap<>();
   private ProjectionFactory factory = DEFAULT_FACTORY;
@@ -22,6 +23,14 @@ public class Stamp {
 
   public Stamp(BufferedImage image) {
     this.img = image;
+  }
+
+  public void setMetadata(StampGroupMetadata metadata) {
+    this.metadata = metadata;
+  }
+
+  public StampGroupMetadata getMetadata() {
+    return metadata;
   }
 
   public synchronized static Stamp getInstance(File file) {

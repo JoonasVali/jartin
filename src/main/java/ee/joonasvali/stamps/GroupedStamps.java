@@ -1,6 +1,7 @@
 package ee.joonasvali.stamps;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -10,6 +11,8 @@ import java.util.List;
  * @author Joonas Vali
  */
 public class GroupedStamps {
+  public static final String STAMPS_PROPERTIES = "stamps.properties";
+
   private File mainfolder;
   private ArrayList<Stamps> stampsGroups;
 
@@ -17,21 +20,27 @@ public class GroupedStamps {
     if (!mainfolder.exists() || !mainfolder.isDirectory()) throw new IllegalArgumentException("Folder must be dir");
     this.mainfolder = mainfolder;
     loadStamps();
-    System.out.println(stampsGroups);
   }
 
   private void loadStamps() {
+    MetadataReader reader = new MetadataReader();
     File[] files = mainfolder.listFiles((dir, name) -> dir.isDirectory());
     stampsGroups = new ArrayList<>(files.length);
     for (File file : files) {
-      load(file);
-    }
-  }
+      Stamps stamps = new Stamps(file);
+      stampsGroups.add(stamps);
 
-  private void load(File file) {
-    stampsGroups.add(
-        new Stamps(file)
-    );
+      File props = new File(file, STAMPS_PROPERTIES);
+      if (props.isFile()) {
+        try {
+          StampGroupMetadata metadata = reader.loadMetadata(props);
+          stamps.setMetadata(metadata);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+
+    }
   }
 
   /**
@@ -55,6 +64,7 @@ public class GroupedStamps {
         System.err.println("Ran out of stamp groups at index " + (i + 1) + ", before could pick " + groups);
         return flatten(picked, stampsPerGroup, stampQuery, fillGroups);
       }
+
       Stamps s = groupQuery.get(copy);
       if (remove) {
         copy.remove(s);
@@ -92,6 +102,6 @@ public class GroupedStamps {
   }
 
   public void clearCaches() {
-    stampsGroups.forEach(s -> s.getStamps().forEach(a -> a.clearRenderCache()));
+    stampsGroups.forEach(s -> s.getStamps().forEach(Stamp::clearRenderCache));
   }
 }

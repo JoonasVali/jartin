@@ -83,9 +83,8 @@ public class PaintingUI extends JPanel {
 
     Painting painting = new Painting(x, y, pallette);
 
-    int projections = (int) (x * y / prefs.getStampCountDemultiplier());
+    int projections = (x * y / prefs.getStampCountDemultiplier());
 
-    System.out.println(projections);
     for (int i = 0; i < projections; i++) {
       painting.addProjection(gen.generate());
     }
