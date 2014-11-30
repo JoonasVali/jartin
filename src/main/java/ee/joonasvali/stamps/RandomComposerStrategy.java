@@ -60,7 +60,9 @@ public class RandomComposerStrategy implements StampComposerStrategy {
     return null;
   }
 
-  private void draw(BufferedImage image1, int maxDimension, Graphics2D iGraph) {
+  private void draw(BufferedImage image1, int maxDimension, Graphics2D g) {
+    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+        RenderingHints.VALUE_INTERPOLATION_BILINEAR);
     AffineTransform transform = new AffineTransform();
     double scale = Math.max(Math.random(), 0.8);
 
@@ -74,7 +76,7 @@ public class RandomComposerStrategy implements StampComposerStrategy {
     transform.rotate(Math.toRadians(Math.random() * 360), image1.getWidth() / 2d, image1.getHeight() / 2d);
 
 
-    iGraph.drawImage(image1, transform, null);
+    g.drawImage(image1, transform, null);
   }
 
 
