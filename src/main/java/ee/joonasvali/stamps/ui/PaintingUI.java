@@ -1,4 +1,14 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.ui;
+
+import ee.joonasvali.stamps.CompositeStamps;
+import ee.joonasvali.stamps.GroupedStamps;
+import ee.joonasvali.stamps.Painting;
+import ee.joonasvali.stamps.Pallette;
+import ee.joonasvali.stamps.ProjectionGenerator;
+import ee.joonasvali.stamps.RandomComposerStrategy;
+import ee.joonasvali.stamps.RandomQuery;
+import ee.joonasvali.stamps.Stamp;
+import ee.joonasvali.stamps.Stamps;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -8,15 +18,11 @@ import java.io.File;
  * @author Joonas Vali
  */
 public class PaintingUI extends JPanel {
-  public static final int WIDTH = 1800;
-  public static final int HEIGHT = 1000;
-  public static final int NUMBER_OF_COLORS = 2;
-  public static final int STAMP_COUNT_DEMULTIPLIER = 1700;
-  public static final int STAMP_GROUPS_COUNT = 4;
-  public static final int STAMPS_PER_GROUP = 15;
 
-  public boolean retainColors = false;
-  public boolean retainStamps = false;
+  private boolean retainColors = false;
+  private boolean retainStamps = false;
+  private Preferences prefs = new Preferences();
+
 
   private Pallette pallette;
   private Stamps stamps;
@@ -56,28 +62,28 @@ public class PaintingUI extends JPanel {
 
   private Stamps createStamps() {
     if (stamps == null || !retainStamps) {
-      return stampPool.getStamps(STAMP_GROUPS_COUNT, STAMPS_PER_GROUP, new RandomQuery<>(), new RandomQuery<>(), false);
+      return stampPool.getStamps(prefs.getStampGroupsCount(), prefs.getStampsPerGroup(), new RandomQuery<>(), new RandomQuery<>(), false);
     } else {
       return stamps;
     }
   }
 
   private void init() {
-    int x = WIDTH;
-    int y = HEIGHT;
+    int x = prefs.getWidth();
+    int y = prefs.getHeight();
 
     stamps = createStamps();
     CompositeStamps compositeStamps = new CompositeStamps(stamps, new RandomComposerStrategy(5));
 
     if (pallette == null || !retainColors) {
-      pallette = new Pallette(NUMBER_OF_COLORS);
+      pallette = new Pallette(prefs.getNumberOfColors());
     }
 
     ProjectionGenerator gen = new ProjectionGenerator(x, y, compositeStamps, pallette);
 
     Painting painting = new Painting(x, y, pallette);
 
-    int projections = (int) (x * y / STAMP_COUNT_DEMULTIPLIER);
+    int projections = (int) (x * y / prefs.getStampCountDemultiplier());
 
     System.out.println(projections);
     for (int i = 0; i < projections; i++) {
