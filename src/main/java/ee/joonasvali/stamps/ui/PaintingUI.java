@@ -91,4 +91,8 @@ public class PaintingUI extends JPanel {
 
     lastImage = painting.getImage();
   }
+
+  public Preferences getPrefs() {
+    return prefs;
+  }
 }
