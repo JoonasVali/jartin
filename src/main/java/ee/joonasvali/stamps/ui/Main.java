@@ -42,11 +42,16 @@ public class Main {
 
 
     JPanel controlPanel = new JPanel(new FlowLayout());
+    JButton settings = new JButton("Preferences");
+    controlPanel.add(settings);
     JCheckBox box1 = new JCheckBox("Reuse color", false);
     JCheckBox box2 = new JCheckBox("Reuse brushes", false);
 
     box1.addActionListener(getColorActionListener(box1));
     box2.addActionListener(getStampsActionListener(box2));
+
+    settings.addActionListener(s -> openSettings());
+
 
     controlPanel.add(box1);
     controlPanel.add(new JSeparator(JSeparator.VERTICAL));
@@ -81,6 +86,16 @@ public class Main {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private void openSettings() {
+    JFrame frame = new JFrame("Preferences");
+    PreferencesPanel panel = new PreferencesPanel(ui.getPrefs(), s -> frame.dispose());
+
+    frame.getContentPane().add(panel);
+    frame.setVisible(true);
+    frame.pack();
+
   }
 
   private ActionListener getStampsActionListener(JCheckBox box2) {
