@@ -11,6 +11,9 @@ import java.util.ArrayList;
  * @author Joonas Vali
  */
 public class Painting {
+  private static RandomQuery<ColorModel> colorModelChooser = RandomQuery.create();
+  private static RandomQuery<Color> colorChooser = RandomQuery.create();
+
   private ArrayList<Projection> projections = new ArrayList<>(200);
   private BufferedImage canvas;
   private int x, y;
@@ -28,9 +31,8 @@ public class Painting {
 
   private void paint() {
     canvas = new BufferedImage(this.x, this.y, BufferedImage.TYPE_INT_ARGB);
-    RandomQuery<ColorModel> colorChooser = new RandomQuery<>();
-    ColorModel colorModel = pallette.getColor(colorChooser);
-    Color backgroundColor = colorModel.getColor(0,0,100, 0);
+    ColorModel colorModel = pallette.getColor(colorModelChooser);
+    Color backgroundColor = colorModel.getColor(colorChooser);
 
     for (int i = 0; i < this.x; i++) {
       for (int j = 0; j < this.y; j++) {

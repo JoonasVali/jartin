@@ -2,6 +2,7 @@ package ee.joonasvali.stamps;
 
 import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.Pallette;
+import ee.joonasvali.stamps.color.PositionAwareQuery;
 
 import java.awt.*;
 
@@ -14,8 +15,6 @@ public class ProjectionGenerator {
 
   StampProvider stamps;
   Pallette pallette;
-  Query<Stamp> stampQuery;
-  Query<ColorModel> colorQuery;
   int canvasX;
   int canvasY;
 
@@ -24,25 +23,26 @@ public class ProjectionGenerator {
     this.pallette = pallette;
     this.canvasX = canvasX;
     this.canvasY = canvasY;
-    this.stampQuery = new RandomQuery<>();
-    this.colorQuery = new RandomQuery<>();
   }
 
-  public Projection generate() {
-    Stamp stamp = stamps.getStamp(stampQuery);
-    // Defined through stamps.properties, default = 1
-    double rarity = stamp.getMetadata().getRarity();
-    if(rarity < 1 && Math.random() > rarity && rarity > 0) {
-      return generate();
-    }
-
+  public Projection generate(Query<Stamp> stampQuery, Query<ColorModel> colorModelQuery, Query<Color> colorQuery) {
     int x = (int) (Math.random() * (canvasX + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
     int y = (int) (Math.random() * (canvasY + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
     double scale = 1 - Math.min(Math.random(), 0.7);
     double rotation = (int) (Math.random() * 360);
 
-    ColorModel colorModel = pallette.getColor(colorQuery);
-    Color color = colorModel.getColor(x, y, scale, rotation);
+    providePositions(stampQuery, x, y, scale, rotation);
+    providePositions(colorModelQuery, x, y, scale, rotation);
+
+    Stamp stamp = stamps.getStamp(stampQuery);
+    // Defined through stamps.properties, default = 1
+    double rarity = stamp.getMetadata().getRarity();
+    if(rarity < 1 && Math.random() > rarity && rarity > 0) {
+      return generate(stampQuery, colorModelQuery, colorQuery);
+    }
+
+    ColorModel colorModel = pallette.getColor(colorModelQuery);
+    Color color = colorModel.getColor(colorQuery);
     int MULTIPLIER = 2;
     int i = (int) (Math.random() * 2 * MULTIPLIER - MULTIPLIER);
     if(i < 0) {
@@ -57,9 +57,15 @@ public class ProjectionGenerator {
     DefaultProjection img = (DefaultProjection) stamp.getProjection(color);
     img.setScale(scale);
 
-    img.setRotation((int) (Math.random() * 360));
+    img.setRotation((int) rotation);
     img.setX(x);
     img.setY(y);
     return img;
+  }
+
+  private void providePositions(Query<?> query, int x, int y, double scale, double rotation) {
+    if(query instanceof PositionAwareQuery) {
+      ((PositionAwareQuery) query).provide(x, y, scale, rotation);
+    }
   }
 }
