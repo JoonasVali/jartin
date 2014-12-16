@@ -1,5 +1,7 @@
 package ee.joonasvali.stamps.ui;
 
+import ee.joonasvali.stamps.AppProperties;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -11,9 +13,10 @@ import java.lang.reflect.InvocationTargetException;
 
 public class Main {
 
-  public static final String SAVE_PATH = "C:\\Users\\Joss\\Desktop\\art\\big\\";
-  JFrame frame;
-  PaintingUI ui = new PaintingUI();
+
+  private JFrame frame;
+  private PaintingUI ui = new PaintingUI();
+  private AppProperties properties = AppProperties.getInstance();
 
   public static void main(String[] args) throws InvocationTargetException, InterruptedException {
     SwingUtilities.invokeAndWait(new Runnable() {
@@ -80,7 +83,7 @@ public class Main {
     try {
       BufferedImage bi = ui.getLastImage();
       String name = System.currentTimeMillis() + ".png";
-      File outputfile = new File(SAVE_PATH + name);
+      File outputfile = new File(properties.getOutput() + File.separator + name);
       ImageIO.write(bi, "png", outputfile);
       JOptionPane.showMessageDialog(frame, "File saved to " + outputfile.getAbsolutePath());
     } catch (IOException e) {

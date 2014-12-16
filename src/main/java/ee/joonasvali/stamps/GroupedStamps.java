@@ -17,7 +17,7 @@ public class GroupedStamps {
   private ArrayList<Stamps> stampsGroups;
 
   public GroupedStamps(File mainfolder) {
-    if (!mainfolder.exists() || !mainfolder.isDirectory()) throw new IllegalArgumentException("Folder must be dir");
+    if (!mainfolder.exists() || !mainfolder.isDirectory()) throw new IllegalArgumentException("Folder " + mainfolder + " must be dir");
     this.mainfolder = mainfolder;
     loadStamps();
   }
