@@ -113,7 +113,6 @@ public class PaintingUI extends JPanel {
     for (int i = 0; i < colors; i++) {
       if (Math.random() < CHANCE_OF_RANDOM_COLOR_MODEL) {
         colorModels.add(new RandomColorModel());
-        System.out.println("Random Generated");
       } else {
         colorModels.add(new PlainColorModel(ColorUtil.getRandomColor(random)));
       }
