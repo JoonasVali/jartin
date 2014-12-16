@@ -1,5 +1,8 @@
 package ee.joonasvali.stamps;
 
+import ee.joonasvali.stamps.color.ColorModel;
+import ee.joonasvali.stamps.color.Pallette;
+
 import java.awt.*;
 
 /**
@@ -12,7 +15,7 @@ public class ProjectionGenerator {
   StampProvider stamps;
   Pallette pallette;
   Query<Stamp> stampQuery;
-  Query<Color> colorQuery;
+  Query<ColorModel> colorQuery;
   int canvasX;
   int canvasY;
 
@@ -35,8 +38,11 @@ public class ProjectionGenerator {
 
     int x = (int) (Math.random() * (canvasX + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
     int y = (int) (Math.random() * (canvasY + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
+    double scale = 1 - Math.min(Math.random(), 0.7);
+    double rotation = (int) (Math.random() * 360);
 
-    Color color = pallette.getColor(colorQuery);
+    ColorModel colorModel = pallette.getColor(colorQuery);
+    Color color = colorModel.getColor(x, y, scale, rotation);
     int MULTIPLIER = 2;
     int i = (int) (Math.random() * 2 * MULTIPLIER - MULTIPLIER);
     if(i < 0) {
@@ -49,7 +55,7 @@ public class ProjectionGenerator {
 
 
     DefaultProjection img = (DefaultProjection) stamp.getProjection(color);
-    img.setScale(1 - Math.min(Math.random(), 0.7));
+    img.setScale(scale);
 
     img.setRotation((int) (Math.random() * 360));
     img.setX(x);

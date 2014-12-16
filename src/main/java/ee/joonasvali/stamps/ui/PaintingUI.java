@@ -4,7 +4,7 @@ import ee.joonasvali.stamps.AppProperties;
 import ee.joonasvali.stamps.CompositeStamps;
 import ee.joonasvali.stamps.GroupedStamps;
 import ee.joonasvali.stamps.Painting;
-import ee.joonasvali.stamps.Pallette;
+import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.ProjectionGenerator;
 import ee.joonasvali.stamps.RandomComposerStrategy;
 import ee.joonasvali.stamps.RandomQuery;

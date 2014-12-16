@@ -1,5 +1,8 @@
 package ee.joonasvali.stamps;
 
+import ee.joonasvali.stamps.color.ColorModel;
+import ee.joonasvali.stamps.color.Pallette;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -8,7 +11,7 @@ import java.util.ArrayList;
  * @author Joonas Vali
  */
 public class Painting {
-  private ArrayList<Projection> projections = new ArrayList<Projection>(200);
+  private ArrayList<Projection> projections = new ArrayList<>(200);
   private BufferedImage canvas;
   private int x, y;
   private Pallette pallette;
@@ -25,12 +28,13 @@ public class Painting {
 
   private void paint() {
     canvas = new BufferedImage(this.x, this.y, BufferedImage.TYPE_INT_ARGB);
-    RandomQuery<Color> colorChooser = new RandomQuery<>();
-    Color color = pallette.getColor(colorChooser);
+    RandomQuery<ColorModel> colorChooser = new RandomQuery<>();
+    ColorModel colorModel = pallette.getColor(colorChooser);
+    Color backgroundColor = colorModel.getColor(0,0,100, 0);
 
     for (int i = 0; i < this.x; i++) {
       for (int j = 0; j < this.y; j++) {
-        canvas.setRGB(i, j, color.getRGB());
+        canvas.setRGB(i, j, backgroundColor.getRGB());
       }
     }
 
