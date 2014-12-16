@@ -12,6 +12,7 @@ import java.awt.*;
 public class ProjectionGenerator {
 
   public static final int OUT_OF_SIGHT_MARGIN = 50;
+  public static final double SCALE_MIN_VALUE = 0.3;
 
   StampProvider stamps;
   Pallette pallette;
@@ -28,11 +29,12 @@ public class ProjectionGenerator {
   public Projection generate(Query<Stamp> stampQuery, Query<ColorModel> colorModelQuery, Query<Color> colorQuery) {
     int x = (int) (Math.random() * (canvasX + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
     int y = (int) (Math.random() * (canvasY + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
-    double scale = 1 - Math.min(Math.random(), 0.7);
+    double scale = Math.max(Math.random(), SCALE_MIN_VALUE);
     double rotation = (int) (Math.random() * 360);
 
     providePositions(stampQuery, x, y, scale, rotation);
     providePositions(colorModelQuery, x, y, scale, rotation);
+    providePositions(colorQuery, x, y, scale, rotation);
 
     Stamp stamp = stamps.getStamp(stampQuery);
     // Defined through stamps.properties, default = 1
