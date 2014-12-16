@@ -1,5 +1,6 @@
 package ee.joonasvali.stamps.ui;
 
+import ee.joonasvali.stamps.AppProperties;
 import ee.joonasvali.stamps.CompositeStamps;
 import ee.joonasvali.stamps.GroupedStamps;
 import ee.joonasvali.stamps.Painting;
@@ -12,7 +13,6 @@ import ee.joonasvali.stamps.Stamps;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 /**
  * @author Joonas Vali
@@ -29,7 +29,7 @@ public class PaintingUI extends JPanel {
 
   private BufferedImage lastImage;
 
-  static GroupedStamps stampPool = new GroupedStamps(new File(Main.class.getResource("/stamps").getFile()));
+  static GroupedStamps stampPool = new GroupedStamps(AppProperties.getInstance().getStampsDir());
 
   public PaintingUI () {
     init();
