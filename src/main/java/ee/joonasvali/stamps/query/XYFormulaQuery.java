@@ -1,22 +1,24 @@
 package ee.joonasvali.stamps.query;
 
-import ee.joonasvali.stamps.color.ColorModel;
-
 import java.util.List;
 
 /**
  * @author Joonas Vali
  */
-public abstract class XYFormulaQuery extends PositionAwareQuery<ColorModel> {
-  BinaryColorScheme scheme;
+public abstract class XYFormulaQuery<C> extends PositionAwareQuery<C> {
+  private Query<C> query;
+  private BinaryQuery<C> binaryQuery;
 
-  public XYFormulaQuery(BinaryColorScheme scheme) {
-    this.scheme = scheme;
+  public XYFormulaQuery(Query<C> query, BinaryQuery<C> binaryQuery) {
+    this.query = query;
+    this.binaryQuery = binaryQuery;
   }
 
   @Override
-  protected ColorModel getUsingPosition(List<ColorModel> list) {
-    return scheme.get(list, x, y, get(x));
+  protected C getUsingPosition(List<C> list) {
+    double horison = get(x);
+    BinaryValue over = y > horison ? BinaryValue.ONE : BinaryValue.ZERO;
+    return binaryQuery.get(list, over, query);
   }
 
   /**

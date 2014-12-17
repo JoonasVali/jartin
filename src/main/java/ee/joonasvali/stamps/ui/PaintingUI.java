@@ -13,8 +13,10 @@ import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.color.PlainColorModel;
 import ee.joonasvali.stamps.color.RandomColorModel;
 import ee.joonasvali.stamps.properties.AppProperties;
+import ee.joonasvali.stamps.query.BinaryQuery;
 import ee.joonasvali.stamps.query.Query;
 import ee.joonasvali.stamps.query.RandomQuery;
+import ee.joonasvali.stamps.query.XYFormulaQuery;
 
 import javax.swing.*;
 import java.awt.*;
@@ -96,7 +98,7 @@ public class PaintingUI extends JPanel {
     int projections = (x * y / prefs.getStampCountDemultiplier());
 
     Query<Stamp> stampQuery = RandomQuery.create();
-    Query<ColorModel> colorModelQuery = RandomQuery.create();
+    Query<ColorModel> colorModelQuery = getColorModelQuery();
     Query<Color> colorQuery = RandomQuery.create();
 
 
@@ -105,6 +107,15 @@ public class PaintingUI extends JPanel {
     }
 
     lastImage = painting.getImage();
+  }
+
+  private Query<ColorModel> getColorModelQuery() {
+    return new XYFormulaQuery<ColorModel>(new RandomQuery<ColorModel>(), new BinaryQuery<ColorModel>(0.3)) {
+      @Override
+      protected double get(int x) {
+        return Math.sin(x / 400) * 50 + 400;
+      }
+    };
   }
 
   private List<ColorModel> generateColorModels(Random random) {
@@ -124,4 +135,6 @@ public class PaintingUI extends JPanel {
   public Preferences getPrefs() {
     return prefs;
   }
+
+
 }
