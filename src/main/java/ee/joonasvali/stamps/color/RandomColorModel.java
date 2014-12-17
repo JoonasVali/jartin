@@ -1,7 +1,7 @@
 package ee.joonasvali.stamps.color;
 
 
-import ee.joonasvali.stamps.Query;
+import ee.joonasvali.stamps.query.Query;
 
 import java.awt.*;
 

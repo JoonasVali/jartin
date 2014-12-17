@@ -1,5 +1,9 @@
 package ee.joonasvali.stamps;
 
+import ee.joonasvali.stamps.properties.MetadataReader;
+import ee.joonasvali.stamps.query.Query;
+import ee.joonasvali.stamps.query.RandomQuery;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.properties;
 
 import ee.joonasvali.stamps.ui.Main;
 

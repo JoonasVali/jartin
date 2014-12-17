@@ -1,13 +1,10 @@
 package ee.joonasvali.stamps.ui;
 
-import ee.joonasvali.stamps.AppProperties;
 import ee.joonasvali.stamps.CompositeStamps;
 import ee.joonasvali.stamps.GroupedStamps;
 import ee.joonasvali.stamps.Painting;
 import ee.joonasvali.stamps.ProjectionGenerator;
-import ee.joonasvali.stamps.Query;
 import ee.joonasvali.stamps.RandomComposerStrategy;
-import ee.joonasvali.stamps.RandomQuery;
 import ee.joonasvali.stamps.Stamp;
 import ee.joonasvali.stamps.Stamps;
 import ee.joonasvali.stamps.color.ColorModel;
@@ -15,6 +12,9 @@ import ee.joonasvali.stamps.color.ColorUtil;
 import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.color.PlainColorModel;
 import ee.joonasvali.stamps.color.RandomColorModel;
+import ee.joonasvali.stamps.properties.AppProperties;
+import ee.joonasvali.stamps.query.Query;
+import ee.joonasvali.stamps.query.RandomQuery;
 
 import javax.swing.*;
 import java.awt.*;
@@ -98,6 +98,7 @@ public class PaintingUI extends JPanel {
     Query<Stamp> stampQuery = RandomQuery.create();
     Query<ColorModel> colorModelQuery = RandomQuery.create();
     Query<Color> colorQuery = RandomQuery.create();
+
 
     for (int i = 0; i < projections; i++) {
       painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));

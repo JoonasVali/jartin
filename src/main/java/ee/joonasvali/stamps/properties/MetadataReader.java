@@ -1,4 +1,6 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.properties;
+
+import ee.joonasvali.stamps.StampGroupMetadata;
 
 import java.io.File;
 import java.io.FileInputStream;

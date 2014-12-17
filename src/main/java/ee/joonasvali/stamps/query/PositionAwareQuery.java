@@ -1,6 +1,4 @@
-package ee.joonasvali.stamps.color;
-
-import ee.joonasvali.stamps.Query;
+package ee.joonasvali.stamps.query;
 
 import java.util.List;
 

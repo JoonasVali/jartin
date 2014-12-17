@@ -1,4 +1,4 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.query;
 
 import java.util.List;
 
