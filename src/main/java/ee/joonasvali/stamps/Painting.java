@@ -2,6 +2,7 @@ package ee.joonasvali.stamps;
 
 import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.Pallette;
+import ee.joonasvali.stamps.query.RandomQuery;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

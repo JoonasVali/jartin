@@ -1,6 +1,6 @@
 package ee.joonasvali.stamps.ui;
 
-import ee.joonasvali.stamps.AppProperties;
+import ee.joonasvali.stamps.properties.AppProperties;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

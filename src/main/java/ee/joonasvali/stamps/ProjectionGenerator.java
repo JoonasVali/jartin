@@ -2,7 +2,8 @@ package ee.joonasvali.stamps;
 
 import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.Pallette;
-import ee.joonasvali.stamps.color.PositionAwareQuery;
+import ee.joonasvali.stamps.query.PositionAwareQuery;
+import ee.joonasvali.stamps.query.Query;
 
 import java.awt.*;
 

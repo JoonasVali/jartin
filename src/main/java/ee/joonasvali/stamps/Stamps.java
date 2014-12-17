@@ -1,5 +1,7 @@
 package ee.joonasvali.stamps;
 
+import ee.joonasvali.stamps.query.Query;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

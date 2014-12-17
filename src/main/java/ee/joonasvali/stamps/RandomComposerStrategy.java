@@ -1,5 +1,7 @@
 package ee.joonasvali.stamps;
 
+import ee.joonasvali.stamps.query.RandomQuery;
+
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
