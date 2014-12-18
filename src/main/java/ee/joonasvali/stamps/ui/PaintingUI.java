@@ -11,7 +11,6 @@ import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.ColorUtil;
 import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.color.PlainColorModel;
-import ee.joonasvali.stamps.color.RandomColorModel;
 import ee.joonasvali.stamps.properties.AppProperties;
 import ee.joonasvali.stamps.query.BinaryQuery;
 import ee.joonasvali.stamps.query.Query;
@@ -97,7 +96,7 @@ public class PaintingUI extends JPanel {
 
     int projections = (x * y / prefs.getStampCountDemultiplier());
 
-    Query<Stamp> stampQuery = RandomQuery.create();
+    Query<Stamp> stampQuery = getStampQuery();
     Query<ColorModel> colorModelQuery = getColorModelQuery();
     Query<Color> colorQuery = RandomQuery.create();
 
@@ -110,12 +109,29 @@ public class PaintingUI extends JPanel {
   }
 
   private Query<ColorModel> getColorModelQuery() {
-    return new XYFormulaQuery<ColorModel>(new RandomQuery<ColorModel>(), new BinaryQuery<ColorModel>(0.3)) {
-      @Override
-      protected double get(int x) {
-        return Math.sin(x / 400) * 50 + 400;
-      }
-    };
+    double wavelength = Math.random() * (prefs.getWidth() / 400) + (prefs.getWidth() / 800);
+    double offset = Math.random() * Math.PI;
+    int movement = prefs.getHeight() / 2;
+    int i = (int) ((Math.random() * (prefs.getHeight() - movement)) + movement) - prefs.getHeight() / 4;
+    return new XYFormulaQuery<ColorModel>(new RandomQuery<ColorModel>(), new BinaryQuery<ColorModel>(Math.random()),
+        x -> {
+          double s = Math.sin(Math.toRadians(x / wavelength)  + offset) * 200 + i;
+          return s;
+        }
+    );
+  }
+
+  private Query<Stamp> getStampQuery() {
+    double wavelength = Math.random() * (prefs.getWidth() / 400) + (prefs.getWidth() / 800);
+    int movement = prefs.getHeight() / 2;
+    double offset = Math.random() * Math.PI;
+    int i = (int) ((Math.random() * (prefs.getHeight() - movement)) + movement) - prefs.getHeight() / 4;
+    return new XYFormulaQuery<Stamp>(new RandomQuery<Stamp>(), new BinaryQuery<Stamp>(Math.random()),
+        x -> {
+          double s = Math.sin(Math.toRadians(x / wavelength) + offset) * 200 + i;
+          return s;
+        }
+    );
   }
 
   private List<ColorModel> generateColorModels(Random random) {
@@ -123,11 +139,7 @@ public class PaintingUI extends JPanel {
     List<ColorModel> colorModels = new ArrayList<>(colors);
 
     for (int i = 0; i < colors; i++) {
-      if (Math.random() < CHANCE_OF_RANDOM_COLOR_MODEL) {
-        colorModels.add(new RandomColorModel());
-      } else {
-        colorModels.add(new PlainColorModel(ColorUtil.getRandomColor(random)));
-      }
+      colorModels.add(new PlainColorModel(ColorUtil.getRandomColor(random)));
     }
     return colorModels;
   }
