@@ -12,7 +12,7 @@ import java.awt.*;
  */
 public class ProjectionGenerator {
 
-  public static final int OUT_OF_SIGHT_MARGIN = 50;
+  public static final int OUT_OF_SIGHT_MARGIN = 150;
   public static final double SCALE_MIN_VALUE = 0.3;
 
   StampProvider stamps;
