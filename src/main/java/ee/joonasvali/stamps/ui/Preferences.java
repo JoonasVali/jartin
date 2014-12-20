@@ -6,10 +6,11 @@ package ee.joonasvali.stamps.ui;
 public class Preferences {
   public static final int WIDTH = 1800;
   public static final int HEIGHT = 1000;
-  public static final int NUMBER_OF_COLORS = 3;
-  public static final int STAMP_COUNT_DEMULTIPLIER = 1500;
-  public static final int STAMP_GROUPS_COUNT = 4;
-  public static final int STAMPS_PER_GROUP = 10;
+  public static final int NUMBER_OF_COLORS = 2;
+  public static final int STAMP_COUNT_DEMULTIPLIER = 2500;
+  public static final int STAMP_GROUPS_COUNT = 6;
+  public static final int STAMPS_PER_GROUP = 4;
+  public static final boolean SPINE_MODE = false;
 
   private int width = WIDTH;
   private int height = HEIGHT;
@@ -17,6 +18,7 @@ public class Preferences {
   private int stampCountDemultiplier = STAMP_COUNT_DEMULTIPLIER;
   private int stampGroupsCount = STAMP_GROUPS_COUNT;
   private int stampsPerGroup = STAMPS_PER_GROUP;
+  private boolean spineMode = SPINE_MODE;
 
   public int getWidth() {
     return width;
@@ -64,5 +66,13 @@ public class Preferences {
 
   public void setStampsPerGroup(int stampsPerGroup) {
     this.stampsPerGroup = stampsPerGroup;
+  }
+
+  public boolean isSpineMode() {
+    return spineMode;
+  }
+
+  public void setSpineMode(boolean spineMode) {
+    this.spineMode = spineMode;
   }
 }
