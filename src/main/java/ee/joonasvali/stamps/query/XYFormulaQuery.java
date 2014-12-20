@@ -8,9 +8,9 @@ import java.util.List;
 public class XYFormulaQuery<C> extends PositionAwareQuery<C> {
   private Query<C> query;
   private BinaryQuery<C> binaryQuery;
-  private Formula formula;
+  private BinaryFormula formula;
 
-  public XYFormulaQuery(Query<C> query, BinaryQuery<C> binaryQuery, Formula formula) {
+  public XYFormulaQuery(Query<C> query, BinaryQuery<C> binaryQuery, BinaryFormula formula) {
     this.query = query;
     this.binaryQuery = binaryQuery;
     this.formula = formula;
@@ -18,9 +18,11 @@ public class XYFormulaQuery<C> extends PositionAwareQuery<C> {
 
   @Override
   protected C getUsingPosition(List<C> list) {
-    double horison = formula.get(x);
-    BinaryValue over = y > horison ? BinaryValue.ONE : BinaryValue.ZERO;
-    return binaryQuery.get(list, over, query);
+    return binaryQuery.get(list, formula.get(x, y), query);
+  }
+
+  public BinaryFormula getFormula() {
+    return formula;
   }
 
   /**
