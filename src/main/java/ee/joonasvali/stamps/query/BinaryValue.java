@@ -8,7 +8,7 @@ import java.util.List;
  * @author Joonas Vali
  */
 public enum BinaryValue {
-  ZERO, ONE;
+  ZERO(false, 0), ONE(true, 1);
 
   private static List<BinaryValue> values;
   static {
@@ -20,5 +20,25 @@ public enum BinaryValue {
 
   public static BinaryValue get(Query<BinaryValue> query) {
     return query.get(values);
+  }
+
+  private int intValue;
+  private boolean booleanValue;
+
+  private BinaryValue(boolean booleanValue, int intValue) {
+    this.intValue = intValue;
+    this.booleanValue = booleanValue;
+  }
+
+  public int getIntValue() {
+    return intValue;
+  }
+
+  public boolean getBooleanValue() {
+    return booleanValue;
+  }
+
+  public static List<BinaryValue> getValues() {
+    return values;
   }
 }

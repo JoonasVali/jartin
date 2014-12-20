@@ -17,6 +17,7 @@ import ee.joonasvali.stamps.query.BinaryQuery;
 import ee.joonasvali.stamps.query.BinaryValue;
 import ee.joonasvali.stamps.query.Query;
 import ee.joonasvali.stamps.query.RandomQuery;
+import ee.joonasvali.stamps.query.ReversingCompoundBinaryFormula;
 import ee.joonasvali.stamps.query.XYFormulaQuery;
 
 import javax.swing.*;
@@ -34,8 +35,12 @@ public class PaintingUI extends JPanel {
   public static final double CHANCE_OF_RANDOM_COLOR_MODEL = 0.1;
   private boolean retainColors = false;
   private boolean retainStamps = false;
+  private boolean retainSpine = false;
   private Preferences prefs = new Preferences();
 
+  private Query<Stamp> stampQuery = getStampQuery();
+  private Query<ColorModel> colorModelQuery = getColorModelQuery();
+  private Query<Color> colorQuery = RandomQuery.create();
 
   private Pallette pallette;
   private Stamps stamps;
@@ -59,6 +64,10 @@ public class PaintingUI extends JPanel {
 
   public void setRetainStamps(boolean retainStamps) {
     this.retainStamps = retainStamps;
+  }
+
+  public void setRetainSpine(boolean retainSpine) {
+    this.retainSpine = retainSpine;
   }
 
   public void onReinit() {
@@ -99,10 +108,13 @@ public class PaintingUI extends JPanel {
     int projections = (x * y / prefs.getStampCountDemultiplier());
 
 
-    boolean showSpine = true;
-    Query<Stamp> stampQuery = getStampQuery();
-    Query<ColorModel> colorModelQuery = getColorModelQuery();
-    Query<Color> colorQuery = RandomQuery.create();
+    boolean showSpine = prefs.isSpineMode();
+
+    if(stampQuery == null || colorModelQuery == null || colorQuery == null || !retainSpine) {
+      stampQuery = getStampQuery();
+      colorModelQuery = getColorModelQuery();
+      colorQuery = RandomQuery.create();
+    }
 
 
     if (!showSpine) {
@@ -123,38 +135,44 @@ public class PaintingUI extends JPanel {
     BinaryFormula formula = ((XYFormulaQuery) q).getFormula();
     BufferedImage image = painting.getImage();
 
-    for(int i = 0; i < image.getWidth(); i++) {
-      for(int j = 0; j < image.getHeight(); j++) {
+    for (int i = 0; i < image.getWidth(); i++) {
+      for (int j = 0; j < image.getHeight(); j++) {
         Color color = formula.get(i, j).equals(BinaryValue.ONE) ? Color.GRAY : Color.DARK_GRAY;
-        image.setRGB(i,j, color.getRGB());
+        image.setRGB(i, j, color.getRGB());
       }
     }
   }
 
   private Query<ColorModel> getColorModelQuery() {
-    double wavelength = Math.random() * (prefs.getWidth() / 400) + (prefs.getWidth() / 800);
-    double offset = Math.random() * Math.PI;
-    int movement = prefs.getHeight() / 2;
-    int i = (int) ((Math.random() * (prefs.getHeight() - movement)) + movement) - prefs.getHeight() / 4;
-    return new XYFormulaQuery<ColorModel>(new RandomQuery<ColorModel>(), new BinaryQuery<ColorModel>(Math.random()),
-        (x, y) -> {
-          double s = Math.sin(Math.toRadians(x / wavelength)  + offset) * 200 + i;
-          return y > s ? BinaryValue.ONE : BinaryValue.ZERO;
-        }
-    );
+    return new XYFormulaQuery(new RandomQuery(), new BinaryQuery(Math.random()), new ReversingCompoundBinaryFormula(generateFormula(), generateFormula()));
   }
 
   private Query<Stamp> getStampQuery() {
-    double wavelength = Math.random() * (prefs.getWidth() / 400) + (prefs.getWidth() / 800);
-    int movement = prefs.getHeight() / 2;
-    double offset = Math.random() * Math.PI;
-    int i = (int) ((Math.random() * (prefs.getHeight() - movement)) + movement) - prefs.getHeight() / 4;
-    return new XYFormulaQuery<Stamp>(new RandomQuery<Stamp>(), new BinaryQuery<Stamp>(Math.random()),
-        (x, y) -> {
-          double s = Math.sin(Math.toRadians(x / wavelength)  + offset) * 200 + i;
-          return y > s ? BinaryValue.ONE : BinaryValue.ZERO;
-        }
-    );
+    return new XYFormulaQuery(new RandomQuery(), new BinaryQuery(Math.random()), new ReversingCompoundBinaryFormula(generateFormula(), generateFormula()));
+  }
+
+  private BinaryFormula generateFormula() {
+    int waves = (int) (Math.random() * 3 + 1);
+    BinaryFormula[] formulas = new BinaryFormula[waves];
+
+    for(int i = 0; i < waves; i++) {
+      double wavelength = Math.random() * (prefs.getWidth() / 400) + (prefs.getWidth() / 800);
+      double offset = Math.random() * Math.PI;
+      int movement = prefs.getHeight() / 2;
+      int n = (int) ((Math.random() * (prefs.getHeight() - movement)) + movement) - prefs.getHeight() / 4;
+
+      formulas[i] =
+          (x, y) -> {
+            double s = Math.sin(Math.toRadians(x / wavelength) + offset) * 200 + n;
+            return y > s ? BinaryValue.ONE : BinaryValue.ZERO;
+          };
+
+    }
+    if(waves > 1) {
+      return new ReversingCompoundBinaryFormula(formulas);
+    } else {
+      return formulas[0];
+    }
   }
 
   private List<ColorModel> generateColorModels(Random random) {

@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Consumer;
 
 public class Main {
 
@@ -49,9 +50,11 @@ public class Main {
     controlPanel.add(settings);
     JCheckBox box1 = new JCheckBox("Reuse color", false);
     JCheckBox box2 = new JCheckBox("Reuse brushes", false);
+    JCheckBox box3 = new JCheckBox("Reuse perspective", false);
 
-    box1.addActionListener(getColorActionListener(box1));
-    box2.addActionListener(getStampsActionListener(box2));
+    box1.addActionListener(getBocActionListener(box1, ui::setRetainColors));
+    box2.addActionListener(getBocActionListener(box2, ui::setRetainStamps));
+    box3.addActionListener(getBocActionListener(box3, ui::setRetainSpine));
 
     settings.addActionListener(s -> openSettings());
 
@@ -59,6 +62,8 @@ public class Main {
     controlPanel.add(box1);
     controlPanel.add(new JSeparator(JSeparator.VERTICAL));
     controlPanel.add(box2);
+    controlPanel.add(new JSeparator(JSeparator.VERTICAL));
+    controlPanel.add(box3);
 
     JButton generate = new JButton("Generate");
     generate.addActionListener(s -> {
@@ -107,6 +112,10 @@ public class Main {
 
   private ActionListener getColorActionListener(JCheckBox box1) {
     return s -> ui.setRetainColors(box1.isSelected());
+  }
+
+  private ActionListener getBocActionListener(JCheckBox box, Consumer<Boolean> method) {
+    return s -> method.accept(box.isSelected());
   }
 
 }
