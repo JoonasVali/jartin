@@ -12,7 +12,9 @@ import ee.joonasvali.stamps.color.ColorUtil;
 import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.color.PlainColorModel;
 import ee.joonasvali.stamps.properties.AppProperties;
+import ee.joonasvali.stamps.query.BinaryFormula;
 import ee.joonasvali.stamps.query.BinaryQuery;
+import ee.joonasvali.stamps.query.BinaryValue;
 import ee.joonasvali.stamps.query.Query;
 import ee.joonasvali.stamps.query.RandomQuery;
 import ee.joonasvali.stamps.query.XYFormulaQuery;
@@ -96,16 +98,37 @@ public class PaintingUI extends JPanel {
 
     int projections = (x * y / prefs.getStampCountDemultiplier());
 
+
+    boolean showSpine = true;
     Query<Stamp> stampQuery = getStampQuery();
     Query<ColorModel> colorModelQuery = getColorModelQuery();
     Query<Color> colorQuery = RandomQuery.create();
 
 
-    for (int i = 0; i < projections; i++) {
-      painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
+    if (!showSpine) {
+      for (int i = 0; i < projections; i++) {
+        painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
+      }
+    } else {
+      paintLines(colorModelQuery, painting);
     }
 
     lastImage = painting.getImage();
+  }
+
+  private void paintLines(Query<?> q, Painting painting) {
+    if (!(q instanceof XYFormulaQuery)) {
+      return;
+    }
+    BinaryFormula formula = ((XYFormulaQuery) q).getFormula();
+    BufferedImage image = painting.getImage();
+
+    for(int i = 0; i < image.getWidth(); i++) {
+      for(int j = 0; j < image.getHeight(); j++) {
+        Color color = formula.get(i, j).equals(BinaryValue.ONE) ? Color.GRAY : Color.DARK_GRAY;
+        image.setRGB(i,j, color.getRGB());
+      }
+    }
   }
 
   private Query<ColorModel> getColorModelQuery() {
@@ -114,9 +137,9 @@ public class PaintingUI extends JPanel {
     int movement = prefs.getHeight() / 2;
     int i = (int) ((Math.random() * (prefs.getHeight() - movement)) + movement) - prefs.getHeight() / 4;
     return new XYFormulaQuery<ColorModel>(new RandomQuery<ColorModel>(), new BinaryQuery<ColorModel>(Math.random()),
-        x -> {
+        (x, y) -> {
           double s = Math.sin(Math.toRadians(x / wavelength)  + offset) * 200 + i;
-          return s;
+          return y > s ? BinaryValue.ONE : BinaryValue.ZERO;
         }
     );
   }
@@ -127,9 +150,9 @@ public class PaintingUI extends JPanel {
     double offset = Math.random() * Math.PI;
     int i = (int) ((Math.random() * (prefs.getHeight() - movement)) + movement) - prefs.getHeight() / 4;
     return new XYFormulaQuery<Stamp>(new RandomQuery<Stamp>(), new BinaryQuery<Stamp>(Math.random()),
-        x -> {
-          double s = Math.sin(Math.toRadians(x / wavelength) + offset) * 200 + i;
-          return s;
+        (x, y) -> {
+          double s = Math.sin(Math.toRadians(x / wavelength)  + offset) * 200 + i;
+          return y > s ? BinaryValue.ONE : BinaryValue.ZERO;
         }
     );
   }
