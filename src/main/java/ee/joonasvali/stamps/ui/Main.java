@@ -18,6 +18,7 @@ public class Main {
   private JFrame frame;
   private PaintingUI ui = new PaintingUI();
   private AppProperties properties = AppProperties.getInstance();
+  private JProgressBar progressBar;
 
   public static void main(String[] args) throws InvocationTargetException, InterruptedException {
     SwingUtilities.invokeAndWait(new Runnable() {
@@ -30,6 +31,7 @@ public class Main {
   }
 
   private void run() {
+
     frame = new JFrame("(C) Jartin 1.0.alpha by Joonas Vali 2014");
 
     JPanel panel = new JPanel(new BorderLayout());
@@ -59,18 +61,25 @@ public class Main {
     settings.addActionListener(s -> openSettings());
 
 
+
     controlPanel.add(box1);
     controlPanel.add(new JSeparator(JSeparator.VERTICAL));
     controlPanel.add(box2);
     controlPanel.add(new JSeparator(JSeparator.VERTICAL));
     controlPanel.add(box3);
 
+    progressBar = new JProgressBar(SwingConstants.HORIZONTAL, 0, 100);
+    progressBar.setStringPainted(true);
+    ProgressBarUpdateUtility progressUtility = new ProgressBarUpdateUtility(progressBar);
+    ui.setProgressListener(progressUtility);
+
     JButton generate = new JButton("Generate");
-    generate.addActionListener(s -> {
-      ui.onReinit();
+    generate.addActionListener(s -> ui.onReinit(() -> {
       scrollPane.revalidate();
-    });
+      progressUtility.setValue(0);
+    }));
     controlPanel.add(generate);
+    controlPanel.add(progressBar);
 
     JButton save = new JButton("Save");
     save.addActionListener(s -> save());
