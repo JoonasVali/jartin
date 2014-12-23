@@ -1,11 +1,13 @@
 package ee.joonasvali.stamps.ui;
 
+import java.awt.*;
+
 /**
  * @author Joonas Vali
  */
 public class Preferences {
-  public static final int WIDTH = 1800;
-  public static final int HEIGHT = 1000;
+  public static final int WIDTH = getMonitorWidth();
+  public static final int HEIGHT = getMonitorHeight();
   public static final int NUMBER_OF_COLORS = 2;
   public static final int STAMP_COUNT_DEMULTIPLIER = 2500;
   public static final int STAMP_GROUPS_COUNT = 6;
@@ -74,5 +76,18 @@ public class Preferences {
 
   public void setSpineMode(boolean spineMode) {
     this.spineMode = spineMode;
+  }
+
+
+  private static int getMonitorWidth() {
+    int width = (int)Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+    System.out.println("Resolution width detected: " + width + " px");
+    return Math.max(width, 200);
+  }
+
+  private static int getMonitorHeight() {
+    int height = (int)Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+    System.out.println("Resolution height detected: " + height + " px");
+    return Math.max(height, 200);
   }
 }
