@@ -26,17 +26,21 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Joonas Vali
  */
 public class PaintingUI extends JPanel {
 
+  private ExecutorService executorService = Executors.newSingleThreadExecutor();
   public static final double CHANCE_OF_RANDOM_COLOR_MODEL = 0.1;
   private boolean retainColors = false;
   private boolean retainStamps = false;
   private boolean retainSpine = false;
   private Preferences prefs = new Preferences();
+  private ProgressListener progressListener;
 
   private Query<Stamp> stampQuery = getStampQuery();
   private Query<ColorModel> colorModelQuery = getColorModelQuery();
@@ -70,11 +74,14 @@ public class PaintingUI extends JPanel {
     this.retainSpine = retainSpine;
   }
 
-  public void onReinit() {
-    clearCaches();
-    init();
-    this.removeAll();
-    this.add(new JLabel(new ImageIcon(lastImage)));
+  public void onReinit(Runnable after) {
+    executorService.execute(() -> {
+      clearCaches();
+      init();
+      PaintingUI.this.removeAll();
+      PaintingUI.this.add(new JLabel(new ImageIcon(lastImage)));
+      after.run();
+    });
   }
 
   private void clearCaches() {
@@ -113,13 +120,17 @@ public class PaintingUI extends JPanel {
     if(stampQuery == null || colorModelQuery == null || colorQuery == null || !retainSpine) {
       stampQuery = getStampQuery();
       colorModelQuery = getColorModelQuery();
-      colorQuery = RandomQuery.create();
+//      colorQuery = RandomQuery.create();
+      colorQuery = getColorQuery();
     }
 
 
     if (!showSpine) {
       for (int i = 0; i < projections; i++) {
         painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
+        if (progressListener != null) {
+          progressListener.setValue((int) (((double) i / (double) projections) * 100));
+        }
       }
     } else {
       paintLines(colorModelQuery, painting);
@@ -148,6 +159,10 @@ public class PaintingUI extends JPanel {
   }
 
   private Query<Stamp> getStampQuery() {
+    return new XYFormulaQuery(new RandomQuery(), new BinaryQuery(Math.random()), new ReversingCompoundBinaryFormula(generateFormula(), generateFormula()));
+  }
+
+  private Query<Color> getColorQuery() {
     return new XYFormulaQuery(new RandomQuery(), new BinaryQuery(Math.random()), new ReversingCompoundBinaryFormula(generateFormula(), generateFormula()));
   }
 
@@ -190,4 +205,7 @@ public class PaintingUI extends JPanel {
   }
 
 
+  public void setProgressListener(ProgressListener listener) {
+    this.progressListener = listener;
+  }
 }
