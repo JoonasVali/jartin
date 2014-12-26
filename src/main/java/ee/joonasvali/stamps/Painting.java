@@ -15,18 +15,19 @@ public class Painting {
   private static RandomQuery<ColorModel> colorModelChooser = RandomQuery.create();
   private static RandomQuery<Color> colorChooser = RandomQuery.create();
 
-  private ArrayList<Projection> projections = new ArrayList<>(200);
+  private ArrayList<Projection> projections;
   private BufferedImage canvas;
   private int x, y;
   private Pallette pallette;
 
-  public Painting(int x, int y, Pallette pallette) {
+  public Painting(int x, int y, Pallette pallette, int projections) {
     this.x = x;
     this.y = y;
     this.pallette = pallette;
+    this.projections = new ArrayList<>(projections);
   }
 
-  public void addProjection(Projection projection) {
+  public synchronized void addProjection(Projection projection) {
     projections.add(projection);
   }
 
