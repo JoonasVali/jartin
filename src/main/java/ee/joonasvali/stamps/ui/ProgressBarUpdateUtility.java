@@ -26,6 +26,9 @@ public class ProgressBarUpdateUtility implements ProgressListener {
 
   @Override
   public synchronized void setValue(int value) {
+    if (this.value == value) {
+      return;
+    }
     this.value = value;
     SwingUtilities.invokeLater(updater);
   }

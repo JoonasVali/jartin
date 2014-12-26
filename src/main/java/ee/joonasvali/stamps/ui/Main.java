@@ -1,5 +1,6 @@
 package ee.joonasvali.stamps.ui;
 
+import ee.joonasvali.stamps.meta.Metadata;
 import ee.joonasvali.stamps.properties.AppProperties;
 
 import javax.imageio.ImageIO;
@@ -32,7 +33,7 @@ public class Main {
 
   private void run() {
 
-    frame = new JFrame("(C) Jartin 1.0.alpha1 by Joonas Vali 2014");
+    frame = new JFrame("(C) " + Metadata.VERSION + " by Joonas Vali 2014");
 
     JPanel panel = new JPanel(new BorderLayout());
     frame.getContentPane().add(panel);

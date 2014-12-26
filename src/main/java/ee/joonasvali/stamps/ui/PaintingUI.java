@@ -11,6 +11,7 @@ import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.ColorUtil;
 import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.color.PlainColorModel;
+import ee.joonasvali.stamps.meta.Metadata;
 import ee.joonasvali.stamps.properties.AppProperties;
 import ee.joonasvali.stamps.query.BinaryFormula;
 import ee.joonasvali.stamps.query.BinaryQuery;
@@ -35,7 +36,6 @@ import java.util.concurrent.Executors;
 public class PaintingUI extends JPanel {
 
   private ExecutorService executorService = Executors.newSingleThreadExecutor();
-  public static final double CHANCE_OF_RANDOM_COLOR_MODEL = 0.1;
   private boolean retainColors = false;
   private boolean retainStamps = false;
   private boolean retainSpine = false;
@@ -54,8 +54,27 @@ public class PaintingUI extends JPanel {
   static GroupedStamps stampPool = new GroupedStamps(AppProperties.getInstance().getStampsDir());
 
   public PaintingUI() {
-    init();
+    initEmpty();
     this.add(new JLabel(new ImageIcon(lastImage)));
+  }
+
+  private void initEmpty() {
+    lastImage = new BufferedImage(prefs.getWidth(), prefs.getHeight(), BufferedImage.TYPE_INT_RGB);
+    Graphics2D g = (Graphics2D) lastImage.getGraphics();
+    g.setColor(Color.LIGHT_GRAY);
+    int max = (int) (Runtime.getRuntime().maxMemory() / (1024 * 1024));
+    String rating = "OK";
+    if (max < 800) {
+      rating = "low";
+    } else if (max < 1000) {
+      rating = "could use more";
+    }
+
+    int i = 35;
+    g.drawString(Metadata.VERSION, 50, i);
+    g.drawString("Image size set to " + prefs.getWidth() + " : " + prefs.getHeight(), 50, i + 15);
+    g.drawString("Total memory available to Java VM: " + max + " MB " + "(" + rating + ")", 50, i + 30);
+    g.drawString("Press \"Generate\" to generate your first image.", 50, i + 45);
   }
 
   public BufferedImage getLastImage() {
@@ -117,7 +136,7 @@ public class PaintingUI extends JPanel {
 
     boolean showSpine = prefs.isSpineMode();
 
-    if(stampQuery == null || colorModelQuery == null || colorQuery == null || !retainSpine) {
+    if (stampQuery == null || colorModelQuery == null || colorQuery == null || !retainSpine) {
       stampQuery = getStampQuery();
       colorModelQuery = getColorModelQuery();
 //      colorQuery = RandomQuery.create();
@@ -170,20 +189,22 @@ public class PaintingUI extends JPanel {
     int waves = (int) (Math.random() * 3 + 1);
     BinaryFormula[] formulas = new BinaryFormula[waves];
 
-    for(int i = 0; i < waves; i++) {
+    for (int i = 0; i < waves; i++) {
       double wavelength = Math.random() * (prefs.getWidth() / 400) + (prefs.getWidth() / 800);
       double offset = Math.random() * Math.PI;
       int movement = prefs.getHeight() / 2;
       int n = (int) ((Math.random() * (prefs.getHeight() - movement)) + movement) - prefs.getHeight() / 4;
 
+      int slope = (int) (Math.random() * 200);
+
       formulas[i] =
           (x, y) -> {
-            double s = Math.sin(Math.toRadians(x / wavelength) + offset) * 200 + n;
+            double s = Math.sin(Math.toRadians(x / wavelength) + offset) * slope + n;
             return y > s ? BinaryValue.ONE : BinaryValue.ZERO;
           };
 
     }
-    if(waves > 1) {
+    if (waves > 1) {
       return new ReversingCompoundBinaryFormula(formulas);
     } else {
       return formulas[0];
