@@ -1,5 +1,7 @@
 package ee.joonasvali.stamps;
 
+import ee.joonasvali.stamps.properties.AppProperties;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -20,6 +22,7 @@ public class Stamp {
 
   private static ProjectionFactory DEFAULT_FACTORY = new DefaultProjectionFactory();
   private static Map<String, Stamp> cache = new HashMap<>();
+  private Loader loader;
 
   public Stamp(BufferedImage image) {
     this.img = image;
@@ -52,16 +55,14 @@ public class Stamp {
   }
 
   public Stamp(File file) {
-    try {
-      img = ImageIO.read(file);
-    } catch (IOException e) {
-      e.printStackTrace();
-      System.err.println("Fuck your permissions, I'm out.");
-      System.exit(-1);
+    loader = new Loader(file);
+    if (!AppProperties.getInstance().isLazyLoading()) {
+      loader.load();
     }
   }
 
   public Projection getProjection(Color color) {
+    lazyLoad();
     BufferedImage image = renders.get(color);
     if (image == null) {
       image = factory.getRawProjection(img, color);
@@ -70,11 +71,18 @@ public class Stamp {
     return factory.getProjectionFromRaw(image);
   }
 
+  private void lazyLoad() {
+    if (AppProperties.getInstance().isLazyLoading() && img == null) {
+      loader.load();
+    }
+  }
+
   public static void clearCache() {
     cache.clear();
   }
 
   public BufferedImage getImg() {
+    lazyLoad();
     return deepCopy(img);
   }
 
@@ -87,5 +95,27 @@ public class Stamp {
 
   public void clearRenderCache() {
     renders.clear();
+    // We clear the img to reload it when it is actually needed
+    if (AppProperties.getInstance().isLazyLoading()) {
+      img = null;
+    }
+  }
+
+  class Loader {
+    private File file;
+
+    Loader(File file) {
+      this.file = file;
+    }
+
+    private void load() {
+      try {
+        img = ImageIO.read(file);
+      } catch (IOException e) {
+        e.printStackTrace();
+        System.err.println("Fuck your permissions, I'm out.");
+        System.exit(-1);
+      }
+    }
   }
 }

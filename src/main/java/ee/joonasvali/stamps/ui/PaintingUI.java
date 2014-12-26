@@ -68,7 +68,6 @@ public class PaintingUI extends JPanel {
     Graphics2D g = (Graphics2D) lastImage.getGraphics();
     g.setColor(Color.LIGHT_GRAY);
     int max = (int) (Runtime.getRuntime().maxMemory() / (1024 * 1024));
-    System.out.println(Runtime.getRuntime().availableProcessors());
     String rating = "OK";
     if (max < 800) {
       rating = "low";
@@ -82,6 +81,10 @@ public class PaintingUI extends JPanel {
     g.drawString("Image size set to " + prefs.getWidth() + " : " + prefs.getHeight(), 50, i + 15);
     g.drawString("Total memory available to Java VM: " + max + " MB " + "(" + rating + ")", 50, i + 30);
     g.drawString("Number of processors available to Java VM: " + processors, 50, i + 45);
+    if(AppProperties.getInstance().isLazyLoading()) {
+      g.drawString("Using lazy loading for stamps (Slower but conserves memory).", 50, i + 60);
+      i += 15;
+    }
     g.drawString("Press \"Generate\" to generate your first image.", 50, i + 60);
   }
 
@@ -170,12 +173,12 @@ public class PaintingUI extends JPanel {
     } else {
       // MULTITHREADED LOGIC
       CountDownLatch latch = new CountDownLatch(processors);
-      int localProjections = projections / processors;
+      int projectionsPerCore = projections / processors;
       int remaining = projections % processors;
       Runnable runnable = () -> {
         try {
 
-          for (int i = 0; i < localProjections; i++) {
+          for (int i = 0; i < projectionsPerCore; i++) {
             painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
             counter.increase();
           }

@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 public class AppProperties {
   private String outputPath;
   private String stampsDirPath;
+  private boolean lazyLoading;
   private File stampsDir;
 
   private static AppProperties properties = new AppProperties();
@@ -20,8 +21,9 @@ public class AppProperties {
   }
 
   private AppProperties() {
-    load("jartin.stamps", this::setStampsDirPath);
-    load("jartin.output", this::setOutput);
+    loadString("jartin.stamps", this::setStampsDirPath);
+    loadString("jartin.output", this::setOutput);
+    loadBoolean("jartin.stamps.lazyloading", this::setLazyLoading);
 
 
     if (outputPath == null) {
@@ -52,9 +54,16 @@ public class AppProperties {
 
     System.out.println("Stamps loaded from " + stampsDir);
     System.out.println("Jartin output is " + outputPath);
+    System.out.println("Using lazy loading for stamps: " + lazyLoading);
   }
 
-  private void load(String key, Consumer<String> setter) {
+  private void loadBoolean(String key, Consumer<Boolean> setter) {
+    Boolean value = Boolean.parseBoolean(System.getProperty(key));
+
+    setter.accept(value);
+  }
+
+  private void loadString(String key, Consumer<String> setter) {
     String value = System.getProperty(key);
     setter.accept(value);
   }
@@ -73,6 +82,14 @@ public class AppProperties {
 
   private void setStampsDirPath(String stampsDirPath) {
     this.stampsDirPath = stampsDirPath;
+  }
+
+  public boolean isLazyLoading() {
+    return lazyLoading;
+  }
+
+  public void setLazyLoading(boolean lazyLoading) {
+    this.lazyLoading = lazyLoading;
   }
 }
 
