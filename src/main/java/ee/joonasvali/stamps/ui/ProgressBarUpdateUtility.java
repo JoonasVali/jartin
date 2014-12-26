@@ -14,6 +14,7 @@ public class ProgressBarUpdateUtility implements ProgressListener {
       paintValue();
     }
   };
+  private volatile boolean queued = false;
 
   public ProgressBarUpdateUtility(JProgressBar bar) {
     this.bar = bar;
@@ -22,14 +23,16 @@ public class ProgressBarUpdateUtility implements ProgressListener {
   private void paintValue() {
     bar.setValue(value);
     bar.repaint();
+    queued = false;
   }
 
   @Override
   public synchronized void setValue(int value) {
-    if (this.value == value) {
+    if (queued || this.value == value) {
       return;
     }
     this.value = value;
+    queued = true;
     SwingUtilities.invokeLater(updater);
   }
 
