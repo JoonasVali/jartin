@@ -1,4 +1,4 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.stamp;
 
 /**
  * @author Joonas Vali

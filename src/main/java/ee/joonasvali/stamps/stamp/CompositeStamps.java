@@ -1,4 +1,4 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.stamp;
 
 import ee.joonasvali.stamps.query.Query;
 
@@ -10,7 +10,7 @@ import java.util.List;
 public class CompositeStamps implements StampProvider {
   private List<Stamp> list;
 
-  public CompositeStamps(Stamps stamps, StampComposerStrategy strategy) {
+  public CompositeStamps(StampProvider stamps, StampComposerStrategy strategy) {
     list = stamps.getStamps();
     Stamps composites = strategy.compose(stamps);
     list.addAll(composites.getStamps());
@@ -19,6 +19,11 @@ public class CompositeStamps implements StampProvider {
   @Override
   public Stamp getStamp(Query<Stamp> q) {
     return q.get(list);
+  }
+
+  @Override
+  public List<Stamp> getStamps() {
+    return list;
   }
 }
 

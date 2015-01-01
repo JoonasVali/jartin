@@ -4,6 +4,8 @@ import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.query.PositionAwareQuery;
 import ee.joonasvali.stamps.query.Query;
+import ee.joonasvali.stamps.stamp.Stamp;
+import ee.joonasvali.stamps.stamp.StampProvider;
 
 import java.awt.*;
 

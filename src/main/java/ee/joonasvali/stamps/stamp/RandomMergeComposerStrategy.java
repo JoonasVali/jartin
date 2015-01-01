@@ -1,44 +1,27 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.stamp;
 
-import ee.joonasvali.stamps.query.RandomQuery;
+import ee.joonasvali.stamps.DefaultProjectionFactory;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Joonas Vali
  */
-public class RandomComposerStrategy implements StampComposerStrategy {
-  private int count;
+public class RandomMergeComposerStrategy extends NumberedRandomComposerStrategy {
 
-  public RandomComposerStrategy(int count) {
-    this.count = count;
+  public RandomMergeComposerStrategy(int count) {
+    super(count);
   }
 
   @Override
-  public Stamps compose(Stamps stamps) {
-    RandomQuery<Stamp> q = new RandomQuery<>();
-    List<Stamp> composites = new ArrayList<>(count);
-    for(int i = 0; i < count; i++) {
-      Stamp s1 = stamps.getStamp(q);
-      Stamp s2 = stamps.getStamp(q);
-      composites.add(create(s1, s2));
-    }
-    return new Stamps(composites);
-  }
-
-  private Stamp create(Stamp s1, Stamp s2) {
+  protected Stamp create(Stamp s1, Stamp s2) {
     BufferedImage image1 = s1.getImg();
     BufferedImage image2 = s2.getImg();
 
-    int width = Math.max(image1.getWidth(), image2.getWidth() );
-    int height = Math.max(image1.getHeight(), image2.getHeight() );
-    int maxDimension = (int) Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
-
-    BufferedImage image = new BufferedImage(maxDimension, maxDimension, BufferedImage.TYPE_INT_RGB);
+    BufferedImage image = createMaxBufferedImage(s1, s2);
+    int maxDimension = Math.max(image.getWidth(), image.getHeight());
     Graphics2D iGraph = (Graphics2D) image.getGraphics();
     iGraph.setPaint (Color.WHITE);
     iGraph.fillRect (0, 0, image.getWidth(), image.getHeight());

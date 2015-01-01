@@ -1,12 +1,7 @@
 package ee.joonasvali.stamps.ui;
 
-import ee.joonasvali.stamps.CompositeStamps;
-import ee.joonasvali.stamps.GroupedStamps;
 import ee.joonasvali.stamps.Painting;
 import ee.joonasvali.stamps.ProjectionGenerator;
-import ee.joonasvali.stamps.RandomComposerStrategy;
-import ee.joonasvali.stamps.Stamp;
-import ee.joonasvali.stamps.Stamps;
 import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.ColorUtil;
 import ee.joonasvali.stamps.color.Pallette;
@@ -20,6 +15,13 @@ import ee.joonasvali.stamps.query.Query;
 import ee.joonasvali.stamps.query.RandomQuery;
 import ee.joonasvali.stamps.query.ReversingCompoundBinaryFormula;
 import ee.joonasvali.stamps.query.XYFormulaQuery;
+import ee.joonasvali.stamps.stamp.CompositeStamps;
+import ee.joonasvali.stamps.stamp.GroupedStamps;
+import ee.joonasvali.stamps.stamp.RandomIntersectionComposerStrategy;
+import ee.joonasvali.stamps.stamp.RandomMergeComposerStrategy;
+import ee.joonasvali.stamps.stamp.Stamp;
+import ee.joonasvali.stamps.stamp.StampProvider;
+import ee.joonasvali.stamps.stamp.Stamps;
 
 import javax.swing.*;
 import java.awt.*;
@@ -52,7 +54,7 @@ public class PaintingUI extends JPanel {
   private Query<Color> colorQuery = RandomQuery.create();
 
   private Pallette pallette;
-  private Stamps stamps;
+  private StampProvider stamps;
 
   private BufferedImage lastImage;
 
@@ -119,9 +121,12 @@ public class PaintingUI extends JPanel {
     stampPool.clearCaches();
   }
 
-  private Stamps createStamps() {
+  private StampProvider createStamps() {
     if (stamps == null || !retainStamps) {
-      return stampPool.getStamps(prefs.getStampGroupsCount(), prefs.getStampsPerGroup(), RandomQuery.create(), RandomQuery.create(), false);
+      Stamps loadedStamps = stampPool.getStamps(prefs.getStampGroupsCount(), prefs.getStampsPerGroup(), RandomQuery.create(), RandomQuery.create(), false);
+      CompositeStamps compositeStamps = new CompositeStamps(loadedStamps, new RandomIntersectionComposerStrategy((int) (Math.random() * 10)));
+      compositeStamps = new CompositeStamps(compositeStamps, new RandomMergeComposerStrategy((int) (Math.random() * 10)));
+      return compositeStamps;
     } else {
       return stamps;
     }
@@ -132,13 +137,12 @@ public class PaintingUI extends JPanel {
     int y = prefs.getHeight();
 
     stamps = createStamps();
-    CompositeStamps compositeStamps = new CompositeStamps(stamps, new RandomComposerStrategy(5));
 
     if (pallette == null || !retainColors) {
       pallette = new Pallette(generateColorModels(new Random()));
     }
 
-    ProjectionGenerator gen = new ProjectionGenerator(x, y, compositeStamps, pallette);
+    ProjectionGenerator gen = new ProjectionGenerator(x, y, stamps, pallette);
 
     int projections = (x * y / prefs.getStampCountDemultiplier());
     Painting painting = new Painting(x, y, pallette, projections);

@@ -1,4 +1,4 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.stamp;
 
 import ee.joonasvali.stamps.query.Query;
 
@@ -27,11 +27,15 @@ public class Stamps implements StampProvider{
     File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith("png") || name.toLowerCase().endsWith("jpg"));
     stamps = new ArrayList<>(files.length);
     for (File file : files) {
-      load(file);
+      try {
+        load(file);
+      } catch(IllegalArgumentException e) {
+        System.err.println("Can't load Stamp from file " + file + " cause: '" + e.getMessage() + "'");
+      }
     }
   }
 
-  private void load(File file) {
+  private void load(File file) throws IllegalArgumentException {
     stamps.add(Stamp.getInstance(file));
   }
 
