@@ -1,5 +1,8 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.stamp;
 
+import ee.joonasvali.stamps.DefaultProjectionFactory;
+import ee.joonasvali.stamps.Projection;
+import ee.joonasvali.stamps.ProjectionFactory;
 import ee.joonasvali.stamps.properties.AppProperties;
 
 import javax.imageio.ImageIO;
@@ -36,7 +39,7 @@ public class Stamp {
     return metadata;
   }
 
-  public synchronized static Stamp getInstance(File file) {
+  public synchronized static Stamp getInstance(File file) throws IllegalArgumentException {
     String path = null;
     try {
       path = file.getCanonicalPath();
@@ -54,7 +57,7 @@ public class Stamp {
     return stamp;
   }
 
-  public Stamp(File file) {
+  public Stamp(File file) throws IllegalArgumentException {
     loader = new Loader(file);
     if (!AppProperties.getInstance().isLazyLoading()) {
       loader.load();
@@ -108,9 +111,9 @@ public class Stamp {
       this.file = file;
     }
 
-    private void load() {
+    private void load() throws IllegalArgumentException{
       try {
-        img = ImageIO.read(file);
+        img = ImageUtil.trim(ImageIO.read(file), Color.WHITE);
       } catch (IOException e) {
         e.printStackTrace();
         System.err.println("Fuck your permissions, I'm out.");

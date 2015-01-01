@@ -1,4 +1,4 @@
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.stamp;
 
 import ee.joonasvali.stamps.properties.MetadataReader;
 import ee.joonasvali.stamps.query.Query;

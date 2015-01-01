@@ -13,6 +13,7 @@ import java.util.List;
 public class DelegatorListTests {
   @Test
   public void testListEnd() {
+
     List<Integer> orig = new ArrayList<>();
     orig.add(1);
     orig.add(2);
