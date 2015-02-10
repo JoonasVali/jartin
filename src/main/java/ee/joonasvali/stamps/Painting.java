@@ -15,10 +15,10 @@ public class Painting {
   private static RandomQuery<ColorModel> colorModelChooser = RandomQuery.create();
   private static RandomQuery<Color> colorChooser = RandomQuery.create();
 
-  private ArrayList<Projection> projections;
-  private BufferedImage canvas;
-  private int x, y;
-  private Pallette pallette;
+  private final ArrayList<Projection> projections;
+  private volatile BufferedImage canvas;
+  private final int x, y;
+  private final Pallette pallette;
 
   public Painting(int x, int y, Pallette pallette, int projections) {
     this.x = x;

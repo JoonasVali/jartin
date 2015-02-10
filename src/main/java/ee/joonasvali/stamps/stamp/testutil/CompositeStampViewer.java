@@ -14,7 +14,7 @@ import java.io.File;
 public class CompositeStampViewer {
   public static void main(String[] args) throws CompositeStampCreationException {
     RandomIntersectionComposerStrategy strategy = new RandomIntersectionComposerStrategy(1);
-    Stamp s1 = Stamp.getInstance(new File("K:\\Progemine\\Java\\stamps\\src\\main\\resources\\stamps\\drip\\stamp29.png"));
+    Stamp s1 = Stamp.getInstance(new File("K:\\Progemine\\Java\\stamps\\src\\main\\resources\\stamps\\steampunk\\II.png"));
     Stamp s2 = Stamp.getInstance(new File("K:\\Progemine\\Java\\stamps\\src\\main\\resources\\stamps\\grunge\\w4.png"));
     Stamp s3 = strategy.create(s1, s2);
     BufferedImage img = s3.getImg();

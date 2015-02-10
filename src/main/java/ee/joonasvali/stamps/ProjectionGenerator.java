@@ -17,10 +17,10 @@ public class ProjectionGenerator {
   public static final int OUT_OF_SIGHT_MARGIN = 150;
   public static final double SCALE_MIN_VALUE = 0.3;
 
-  StampProvider stamps;
-  Pallette pallette;
-  int canvasX;
-  int canvasY;
+  private final StampProvider stamps;
+  private final Pallette pallette;
+  private final int canvasX;
+  private final int canvasY;
 
   public ProjectionGenerator(int canvasX, int canvasY, StampProvider stamps, Pallette pallette) {
     this.stamps = stamps;
@@ -35,6 +35,7 @@ public class ProjectionGenerator {
     double scale = Math.max(Math.random(), SCALE_MIN_VALUE);
     double rotation = (int) (Math.random() * 360);
 
+    // We provide the calculated positions for each query, so it will be position aware and can make decision based on it.
     providePositions(stampQuery, x, y, scale, rotation);
     providePositions(colorModelQuery, x, y, scale, rotation);
     providePositions(colorQuery, x, y, scale, rotation);

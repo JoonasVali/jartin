@@ -3,6 +3,7 @@ package ee.joonasvali.stamps.stamp;
 import ee.joonasvali.stamps.DefaultProjectionFactory;
 import ee.joonasvali.stamps.Projection;
 import ee.joonasvali.stamps.ProjectionFactory;
+import ee.joonasvali.stamps.code.ThreadSafe;
 import ee.joonasvali.stamps.properties.AppProperties;
 
 import javax.imageio.ImageIO;
@@ -12,23 +13,27 @@ import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 
 public class Stamp {
 
-  private StampGroupMetadata metadata = new StampGroupMetadata();
-  private BufferedImage img = null;
-  private HashMap<Color, BufferedImage> renders = new HashMap<>();
-  private ProjectionFactory factory = DEFAULT_FACTORY;
+  private volatile StampGroupMetadata metadata = new StampGroupMetadata();
+  private volatile BufferedImage img = null;
+  private final ConcurrentHashMap<Color, Future<BufferedImage>> renders = new ConcurrentHashMap<>();
+  private final ProjectionFactory factory = DEFAULT_FACTORY;
 
-  private static ProjectionFactory DEFAULT_FACTORY = new DefaultProjectionFactory();
-  private static Map<String, Stamp> cache = new HashMap<>();
-  private Loader loader;
+  private static final ProjectionFactory DEFAULT_FACTORY = new DefaultProjectionFactory();
+  private static final ConcurrentHashMap<String, Future<Stamp>> cache = new ConcurrentHashMap<>();
+  private final Loader loader;
 
   public Stamp(BufferedImage image) {
     this.img = image;
+    loader = null;
   }
 
   public void setMetadata(StampGroupMetadata metadata) {
@@ -39,7 +44,8 @@ public class Stamp {
     return metadata;
   }
 
-  public synchronized static Stamp getInstance(File file) throws IllegalArgumentException {
+  @ThreadSafe
+  public static Stamp getInstance(File file) throws IllegalArgumentException {
     String path = null;
     try {
       path = file.getCanonicalPath();
@@ -48,30 +54,58 @@ public class Stamp {
       System.err.println("Fuck your permissions, I'm out.");
       System.exit(-1);
     }
-    Stamp stamp = cache.get(path);
+    Future<Stamp> stamp = cache.get(path);
 
     if (stamp == null) {
-      stamp = new Stamp(file);
-      cache.put(path, stamp);
+      Callable<Stamp> stampInitialization = () -> {
+        Stamp result = new Stamp(file);
+        if (!AppProperties.getInstance().isLazyLoading()) {
+          result.loader.load();
+        }
+        return result;
+      };
+
+      FutureTask<Stamp> st = new FutureTask<>(stampInitialization);
+      stamp = cache.putIfAbsent(path, st);
+      if (stamp == null) {
+        stamp = st;
+        st.run();
+      }
     }
-    return stamp;
+    try {
+      return stamp.get();
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+      System.exit(-1);
+      // Satisfy compiler;
+      return null;
+    }
   }
 
-  public Stamp(File file) throws IllegalArgumentException {
+  private Stamp(File file) throws IllegalArgumentException {
     loader = new Loader(file);
-    if (!AppProperties.getInstance().isLazyLoading()) {
-      loader.load();
-    }
   }
 
+  @ThreadSafe
   public Projection getProjection(Color color) {
     lazyLoad();
-    BufferedImage image = renders.get(color);
+    Future<BufferedImage> image = renders.get(color);
     if (image == null) {
-      image = factory.getRawProjection(img, color);
-      renders.put(color, image);
+      Callable<BufferedImage> callable = () -> factory.getRawProjection(img, color);
+      FutureTask<BufferedImage> ft = new FutureTask<>(callable);
+      image = renders.putIfAbsent(color, ft);
+      if (image == null) {
+        image = ft;
+        ft.run();
+      }
     }
-    return factory.getProjectionFromRaw(image);
+
+    try {
+      return factory.getProjectionFromRaw(image.get());
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
   }
 
   private void lazyLoad() {
