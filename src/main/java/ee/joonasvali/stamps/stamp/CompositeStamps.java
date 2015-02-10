@@ -8,7 +8,7 @@ import java.util.List;
  * @author Joonas Vali
  */
 public class CompositeStamps implements StampProvider {
-  private List<Stamp> list;
+  private final List<Stamp> list;
 
   public CompositeStamps(StampProvider stamps, StampComposerStrategy strategy) {
     list = stamps.getStamps();

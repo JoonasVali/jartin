@@ -4,7 +4,7 @@ package ee.joonasvali.stamps.stamp;
  * @author Joonas Vali
  */
 public class StampGroupMetadata {
-  private double rarity = 1;
+  private volatile double rarity = 1;
 
   public double getRarity() {
     return rarity;

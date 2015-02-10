@@ -16,10 +16,9 @@ import java.util.function.Consumer;
 public class Main {
 
 
-  private JFrame frame;
-  private PaintingUI ui = new PaintingUI();
-  private AppProperties properties = AppProperties.getInstance();
-  private JProgressBar progressBar;
+  private volatile JFrame frame;
+  private volatile PaintingUI ui = new PaintingUI();
+  private volatile AppProperties properties = AppProperties.getInstance();
 
   public static void main(String[] args) throws InvocationTargetException, InterruptedException {
     SwingUtilities.invokeAndWait(new Runnable() {
@@ -69,7 +68,7 @@ public class Main {
     controlPanel.add(new JSeparator(JSeparator.VERTICAL));
     controlPanel.add(box3);
 
-    progressBar = new JProgressBar(SwingConstants.HORIZONTAL, 0, 100);
+    JProgressBar progressBar = new JProgressBar(SwingConstants.HORIZONTAL, 0, 100);
     progressBar.setStringPainted(true);
     ProgressBarUpdateUtility progressUtility = new ProgressBarUpdateUtility(progressBar);
     ui.setProgressListener(progressUtility);

@@ -8,12 +8,6 @@ import javax.swing.*;
 public class ProgressBarUpdateUtility implements ProgressListener {
   private final JProgressBar bar;
   private volatile int value;
-  private Runnable updater = new Runnable() {
-    @Override
-    public void run() {
-      paintValue();
-    }
-  };
   private volatile boolean queued = false;
 
   public ProgressBarUpdateUtility(JProgressBar bar) {
@@ -33,7 +27,7 @@ public class ProgressBarUpdateUtility implements ProgressListener {
     }
     this.value = value;
     queued = true;
-    SwingUtilities.invokeLater(updater);
+    SwingUtilities.invokeLater(this::paintValue);
   }
 
 

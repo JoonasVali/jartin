@@ -9,10 +9,10 @@ import java.util.function.Consumer;
  * @author Joonas Vali
  */
 public class AppProperties {
-  private String outputPath;
-  private String stampsDirPath;
+  private volatile String outputPath;
+  private volatile String stampsDirPath;
   private boolean lazyLoading;
-  private File stampsDir;
+  private volatile File stampsDir;
 
   private final static AppProperties properties = new AppProperties();
 

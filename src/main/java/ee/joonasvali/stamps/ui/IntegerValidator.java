@@ -6,10 +6,10 @@ import javax.swing.*;
  * @author Joonas Vali
  */
 public class IntegerValidator implements Validator{
-  private int minValue;
-  private int maxValue;
-  private String name;
-  private JTextField input;
+  private final int minValue;
+  private final int maxValue;
+  private final String name;
+  private final JTextField input;
 
   public IntegerValidator(JTextField input, int minValue, int maxValue, String name) {
     this.minValue = minValue;

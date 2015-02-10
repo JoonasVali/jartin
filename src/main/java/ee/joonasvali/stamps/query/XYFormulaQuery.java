@@ -6,9 +6,9 @@ import java.util.List;
  * @author Joonas Vali
  */
 public class XYFormulaQuery<C> extends PositionAwareQuery<C> {
-  private Query<C> query;
-  private BinaryQuery<C> binaryQuery;
-  private BinaryFormula formula;
+  private final Query<C> query;
+  private final BinaryQuery<C> binaryQuery;
+  private final BinaryFormula formula;
 
   public XYFormulaQuery(Query<C> query, BinaryQuery<C> binaryQuery, BinaryFormula formula) {
     this.query = query;

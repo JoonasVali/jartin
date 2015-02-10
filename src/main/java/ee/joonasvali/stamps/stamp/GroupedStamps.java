@@ -17,19 +17,20 @@ import java.util.List;
 public class GroupedStamps {
   public static final String STAMPS_PROPERTIES = "stamps.properties";
 
-  private File mainfolder;
-  private ArrayList<Stamps> stampsGroups;
+  private final File mainfolder;
+  private final ArrayList<Stamps> stampsGroups;
 
   public GroupedStamps(File mainfolder) {
     if (!mainfolder.exists() || !mainfolder.isDirectory()) throw new IllegalArgumentException("Folder " + mainfolder + " must be dir");
     this.mainfolder = mainfolder;
+    this.stampsGroups = new ArrayList<>();
     loadStamps();
   }
 
   private void loadStamps() {
     MetadataReader reader = new MetadataReader();
     File[] files = mainfolder.listFiles((dir, name) -> dir.isDirectory());
-    stampsGroups = new ArrayList<>(files.length);
+    stampsGroups.ensureCapacity(files.length);
     for (File file : files) {
       Stamps stamps = new Stamps(file);
       stampsGroups.add(stamps);
