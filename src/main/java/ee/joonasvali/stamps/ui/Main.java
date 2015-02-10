@@ -74,10 +74,16 @@ public class Main {
     ui.setProgressListener(progressUtility);
 
     JButton generate = new JButton("Generate");
-    generate.addActionListener(s -> ui.onReinit(() -> {
-      scrollPane.revalidate();
-      progressUtility.setValue(0);
-    }));
+    generate.addActionListener(
+        s -> {
+          generate.setEnabled(false);
+          ui.onReinit(() -> {
+            scrollPane.revalidate();
+            progressUtility.setValue(0);
+            generate.setEnabled(true);
+          });
+        }
+    );
     controlPanel.add(generate);
     controlPanel.add(progressBar);
 
