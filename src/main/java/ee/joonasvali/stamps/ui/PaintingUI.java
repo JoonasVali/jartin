@@ -107,6 +107,7 @@ public class PaintingUI extends JPanel {
   }
 
   public void onReinit(Runnable after) {
+    assert SwingUtilities.isEventDispatchThread();
     generalGeneratorExecutor.execute(() -> {
       clearCaches();
       init();
