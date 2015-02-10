@@ -14,7 +14,7 @@ public class AppProperties {
   private boolean lazyLoading;
   private File stampsDir;
 
-  private static AppProperties properties = new AppProperties();
+  private final static AppProperties properties = new AppProperties();
 
   public static AppProperties getInstance() {
     return properties;

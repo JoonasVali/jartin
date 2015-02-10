@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class Stamps implements StampProvider{
   private File folder;
-  private ArrayList<Stamp> stamps;
+  private volatile ArrayList<Stamp> stamps;
 
   public Stamps(File folder) {
     if (!folder.exists() || !folder.isDirectory()) throw new IllegalArgumentException("Folder must be dir");

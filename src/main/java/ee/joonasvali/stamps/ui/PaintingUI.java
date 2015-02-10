@@ -181,12 +181,10 @@ public class PaintingUI extends JPanel {
       int remaining = projections % processors;
       Runnable runnable = () -> {
         try {
-
           for (int i = 0; i < projectionsPerCore; i++) {
             painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
             counter.increase();
           }
-
         } finally {
           latch.countDown();
         }
