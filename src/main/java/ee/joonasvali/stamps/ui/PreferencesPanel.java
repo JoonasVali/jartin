@@ -12,13 +12,13 @@ import java.util.function.Supplier;
  * @author Joonas Vali
  */
 public class PreferencesPanel extends JPanel {
-  private Preferences preferences;
-  private JButton save = new JButton("Save");
-  private ActionListener closeAction;
+  private final Preferences preferences;
+  private final JButton save = new JButton("Save");
+  private final ActionListener closeAction;
 
-  private JLabel errors = new JLabel();
-  private List<Validator> validatorList = new LinkedList<Validator>();
-  private List<ActionListener> onSave = new LinkedList<>();
+  private final JLabel errors = new JLabel();
+  private final List<Validator> validatorList = new LinkedList<>();
+  private final List<ActionListener> onSave = new LinkedList<>();
 
 
   public PreferencesPanel(Preferences preferences, ActionListener closeAction) {

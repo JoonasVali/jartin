@@ -10,7 +10,7 @@ import java.util.List;
  * @author Joonas Vali
  */
 public class Stamps implements StampProvider{
-  private File folder;
+  private final File folder;
   private volatile ArrayList<Stamp> stamps;
 
   public Stamps(File folder) {
@@ -20,6 +20,7 @@ public class Stamps implements StampProvider{
   }
 
   public Stamps(List<Stamp> stamps) {
+    this.folder = null;
     this.stamps = new ArrayList<>(stamps);
   }
 

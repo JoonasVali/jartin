@@ -14,13 +14,13 @@ public class Preferences {
   public static final int STAMPS_PER_GROUP = 20;
   public static final boolean SPINE_MODE = false;
 
-  private int width = WIDTH;
-  private int height = HEIGHT;
-  private int numberOfColors = NUMBER_OF_COLORS;
-  private int stampCountDemultiplier = STAMP_COUNT_DEMULTIPLIER;
-  private int stampGroupsCount = STAMP_GROUPS_COUNT;
-  private int stampsPerGroup = STAMPS_PER_GROUP;
-  private boolean spineMode = SPINE_MODE;
+  private volatile int width = WIDTH;
+  private volatile int height = HEIGHT;
+  private volatile int numberOfColors = NUMBER_OF_COLORS;
+  private volatile int stampCountDemultiplier = STAMP_COUNT_DEMULTIPLIER;
+  private volatile int stampGroupsCount = STAMP_GROUPS_COUNT;
+  private volatile int stampsPerGroup = STAMPS_PER_GROUP;
+  private volatile boolean spineMode = SPINE_MODE;
 
   public int getWidth() {
     return width;

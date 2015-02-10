@@ -7,7 +7,7 @@ import java.util.Random;
  * @author Joonas Vali
  */
 public class ColorUtil {
-  private static Random DEFAULT_RANDOM = new Random();
+  private static final Random DEFAULT_RANDOM = new Random();
 
   public static Color getRandomColor() {
     return getRandomColor(DEFAULT_RANDOM);

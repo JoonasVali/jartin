@@ -6,11 +6,11 @@ import java.awt.image.BufferedImage;
 
 public class DefaultProjection implements Projection {
 
-  private BufferedImage img;
-  private int x;
-  private int y;
-  private double scale;
-  private int rotation;
+  private volatile BufferedImage img;
+  private volatile int x;
+  private volatile int y;
+  private volatile double scale;
+  private volatile int rotation;
 
   public DefaultProjection(BufferedImage img) {
     this.img = img;

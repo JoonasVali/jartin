@@ -8,7 +8,7 @@ import java.awt.*;
  * @author Joonas Vali
  */
 public class PlainColorModel implements ColorModel {
-  private Color color;
+  private final Color color;
 
   public PlainColorModel(Color color) {
     this.color = color;

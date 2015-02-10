@@ -6,7 +6,7 @@ import java.util.List;
  * @author Joonas Vali
  */
 public class BinaryQuery<T> {
-  private double division;
+  private final double division;
   /**
    * @param division 0 < x < 1
    */

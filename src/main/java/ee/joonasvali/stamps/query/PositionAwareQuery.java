@@ -6,11 +6,11 @@ import java.util.List;
  * @author Joonas Vali
  */
 public abstract class PositionAwareQuery<T> implements Query<T> {
-  protected int x;
-  protected int y;
-  protected double size;
-  protected double rotation;
-  protected boolean argumentsSet = false;
+  protected volatile int x;
+  protected volatile int y;
+  protected volatile double size;
+  protected volatile double rotation;
+  protected volatile boolean argumentsSet = false;
 
   public void provide(int x, int y, double size, double rotation) {
     this.x = x;

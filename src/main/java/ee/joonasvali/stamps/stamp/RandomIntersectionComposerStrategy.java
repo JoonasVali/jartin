@@ -12,7 +12,6 @@ public class RandomIntersectionComposerStrategy extends NumberedRandomComposerSt
 
   public RandomIntersectionComposerStrategy(int count) {
     super(count);
-    System.out.println("Creating " + count + " intersection stamps.");
   }
 
   @Override

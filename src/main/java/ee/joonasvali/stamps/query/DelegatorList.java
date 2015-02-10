@@ -14,8 +14,8 @@ import java.util.ListIterator;
  * @author Joonas Vali
  */
 public class DelegatorList<E> implements List<E> {
-  private List<E> original;
-  private int start, end;
+  private final List<E> original;
+  private final int start, end;
   public DelegatorList(List<E> original, int start, int end) {
     if(start < 0 || start > original.size() - 1) throw new IllegalArgumentException("Start can't be " + start);
     if(end < 1 || end <= start || end > original.size()) throw new IllegalArgumentException("End can't be " + end);

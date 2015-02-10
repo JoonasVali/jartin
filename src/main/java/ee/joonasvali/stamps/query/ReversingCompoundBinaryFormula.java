@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class ReversingCompoundBinaryFormula implements BinaryFormula {
 
-  private List<BinaryFormula> formulas;
+  private final List<BinaryFormula> formulas;
 
   public ReversingCompoundBinaryFormula(BinaryFormula... formulas) {
     this.formulas = Arrays.asList(formulas);

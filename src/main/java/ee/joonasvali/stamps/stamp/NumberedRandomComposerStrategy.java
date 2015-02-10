@@ -10,7 +10,7 @@ import java.util.List;
  * @author Joonas Vali
  */
 public abstract class NumberedRandomComposerStrategy implements StampComposerStrategy {
-  private int count;
+  private final int count;
 
   public NumberedRandomComposerStrategy(int count) {
     this.count = count;

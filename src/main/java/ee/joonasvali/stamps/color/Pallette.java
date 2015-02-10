@@ -9,7 +9,7 @@ import java.util.List;
  * @author Joonas Vali
  */
 public class Pallette {
-  private List<ColorModel> colors;
+  private final List<ColorModel> colors;
 
   public Pallette(List<ColorModel> colorModels) {
     this.colors = new ArrayList<>(colorModels);
