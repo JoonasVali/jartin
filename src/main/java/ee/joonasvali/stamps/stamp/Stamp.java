@@ -86,6 +86,10 @@ public class Stamp {
     loader = new Loader(file);
   }
 
+  public Projection getProjection(Color color, int x, int y) {
+    return factory.getProjectionFromRaw(factory.getRawProjection(img, color, x, y));
+  }
+
   @ThreadSafe
   public Projection getProjection(Color color) {
     lazyLoad();

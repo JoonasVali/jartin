@@ -2,6 +2,8 @@ package ee.joonasvali.stamps;
 
 import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.Pallette;
+import ee.joonasvali.stamps.color.PositionAwareColor;
+import ee.joonasvali.stamps.color.PositionAwareColorModel;
 import ee.joonasvali.stamps.query.RandomQuery;
 
 import java.awt.*;
@@ -17,12 +19,12 @@ public class Painting {
 
   private final ArrayList<Projection> projections;
   private volatile BufferedImage canvas;
-  private final int x, y;
+  private final int width, height;
   private final Pallette pallette;
 
-  public Painting(int x, int y, Pallette pallette, int projections) {
-    this.x = x;
-    this.y = y;
+  public Painting(int width, int height, Pallette pallette, int projections) {
+    this.width = width;
+    this.height = height;
     this.pallette = pallette;
     this.projections = new ArrayList<>(projections);
   }
@@ -32,13 +34,24 @@ public class Painting {
   }
 
   private void paint() {
-    canvas = new BufferedImage(this.x, this.y, BufferedImage.TYPE_INT_ARGB);
+    canvas = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
     ColorModel colorModel = pallette.getColor(colorModelChooser);
-    Color backgroundColor = colorModel.getColor(colorChooser);
+    if(colorModel instanceof PositionAwareColorModel) {
+      PositionAwareColorModel bgModel = (PositionAwareColorModel)colorModel;
+      PositionAwareColor bgColor = bgModel.getColor();
 
-    for (int i = 0; i < this.x; i++) {
-      for (int j = 0; j < this.y; j++) {
-        canvas.setRGB(i, j, backgroundColor.getRGB());
+      for (int i = 0; i < this.width; i++) {
+        for (int j = 0; j < this.height; j++) {
+          canvas.setRGB(i, j, bgColor.getColor(i, j).getRGB());
+        }
+      }
+    } else {
+      Color backgroundColor = colorModel.getColor(colorChooser);
+
+      for (int i = 0; i < this.width; i++) {
+        for (int j = 0; j < this.height; j++) {
+          canvas.setRGB(i, j, backgroundColor.getRGB());
+        }
       }
     }
 

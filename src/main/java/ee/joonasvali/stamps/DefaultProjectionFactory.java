@@ -1,5 +1,7 @@
 package ee.joonasvali.stamps;
 
+import ee.joonasvali.stamps.color.PositionAwareColor;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -7,6 +9,15 @@ public class DefaultProjectionFactory implements ProjectionFactory {
   @Override
   public BufferedImage getRawProjection(BufferedImage img, Color color) {
     return getRawProjectionImage(img, color);
+  }
+
+  @Override
+  public BufferedImage getRawProjection(BufferedImage img, Color color, int x, int y) {
+    if(color instanceof PositionAwareColor) {
+      return getRawProjectionImage(img, (PositionAwareColor)color, x, y);
+    } else {
+      return getRawProjection(img, color);
+    }
   }
 
   public static BufferedImage getRawProjectionImage(BufferedImage img, Color color) {
@@ -23,6 +34,28 @@ public class DefaultProjectionFactory implements ProjectionFactory {
         } else {
           int alpha = 255 - (red + green + blue) / 3;
           Color c = new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+          newImg.setRGB(j, i, c.getRGB());
+        }
+      }
+    }
+    return newImg;
+  }
+
+  public synchronized static BufferedImage getRawProjectionImage(BufferedImage img, PositionAwareColor color, int x, int y) {
+    BufferedImage newImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
+    for (int i = 0; i < img.getHeight(); i++) {
+      for (int j = 0; j < img.getWidth(); j++) {
+        int rgb = img.getRGB(j, i);
+        int red = (rgb >> 16) & 0x000000FF;
+        int green = (rgb >> 8) & 0x000000FF;
+        int blue = (rgb) & 0x000000FF;
+        if (red == 255 && green == 255 && blue == 255) {
+          // Transparent
+          newImg.setRGB(j, i, 0);
+        } else {
+          Color awareColor = color.getColor(x + j, y + i);
+          int alpha = 255 - (red + green + blue) / 3;
+          Color c = new Color(awareColor.getRed(), awareColor.getGreen(), awareColor.getBlue(), alpha);
           newImg.setRGB(j, i, c.getRGB());
         }
       }
