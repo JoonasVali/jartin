@@ -1,6 +1,7 @@
 package ee.joonasvali.stamps;
 
 import ee.joonasvali.stamps.color.ColorModel;
+import ee.joonasvali.stamps.color.PositionAwareColorModel;
 import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.query.PositionAwareQuery;
 import ee.joonasvali.stamps.query.Query;
@@ -30,6 +31,7 @@ public class ProjectionGenerator {
   }
 
   public Projection generate(Query<Stamp> stampQuery, Query<ColorModel> colorModelQuery, Query<Color> colorQuery) {
+    // This is the actual place where calculation of every projection scale, rotation and position takes place
     int x = (int) (Math.random() * (canvasX + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
     int y = (int) (Math.random() * (canvasY + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
     double scale = Math.max(Math.random(), SCALE_MIN_VALUE);
@@ -47,26 +49,37 @@ public class ProjectionGenerator {
       return generate(stampQuery, colorModelQuery, colorQuery);
     }
 
+    DefaultProjection projection;
     ColorModel colorModel = pallette.getColor(colorModelQuery);
-    Color color = colorModel.getColor(colorQuery);
-    int MULTIPLIER = 2;
-    int i = (int) (Math.random() * 2 * MULTIPLIER - MULTIPLIER);
-    if(i < 0) {
-      for(; i < 0; i++)
-        color = color.brighter();
+    if (colorModel instanceof PositionAwareColorModel) {
+      PositionAwareColorModel mColor = (PositionAwareColorModel)colorModel;
+      projection = (DefaultProjection) stamp.getProjection(mColor.getColor(), x, y);
+      projection.setScale(scale);
+      projection.setRotation((int) rotation);
+      projection.setX(x);
+      projection.setY(y);
     } else {
-      for(; i > 0; i--)
-        color = color.darker();
+      Color color = colorModel.getColor(colorQuery);
+      int MULTIPLIER = 2;
+      int i = (int) (Math.random() * 2 * MULTIPLIER - MULTIPLIER);
+      if(i < 0) {
+        for(; i < 0; i++)
+          color = color.brighter();
+      } else {
+        for(; i > 0; i--)
+          color = color.darker();
+      }
+
+
+      projection = (DefaultProjection) stamp.getProjection(color);
+      projection.setScale(scale);
+
+      projection.setRotation((int) rotation);
+      projection.setX(x);
+      projection.setY(y);
     }
 
-
-    DefaultProjection img = (DefaultProjection) stamp.getProjection(color);
-    img.setScale(scale);
-
-    img.setRotation((int) rotation);
-    img.setX(x);
-    img.setY(y);
-    return img;
+    return projection;
   }
 
   private void providePositions(Query<?> query, int x, int y, double scale, double rotation) {

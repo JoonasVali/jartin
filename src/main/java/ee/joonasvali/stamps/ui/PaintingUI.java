@@ -4,6 +4,7 @@ import ee.joonasvali.stamps.Painting;
 import ee.joonasvali.stamps.ProjectionGenerator;
 import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.ColorUtil;
+import ee.joonasvali.stamps.color.GradientColorModel;
 import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.color.PlainColorModel;
 import ee.joonasvali.stamps.meta.Metadata;
@@ -39,6 +40,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * TODO refactor non UI logic out of here
  */
 public class PaintingUI extends JPanel {
+
+  public static final double CHANCE_OF_GRADIENT_COLOR = 0.7;
 
   private ExecutorService generalGeneratorExecutor = Executors.newSingleThreadExecutor();
   private static ExecutorService multiThreadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -193,14 +196,16 @@ public class PaintingUI extends JPanel {
       for (int i = 0; i < processors; i++) {
         multiThreadExecutor.execute(runnable);
       }
+
+      if (remaining > 0) {
+        // Add remaining projections
+        addProjections(gen, painting, remaining, 1, counter);
+      }
+
       try {
         latch.await();
       } catch (InterruptedException e) {
         e.printStackTrace();
-      }
-      if (remaining > 0) {
-        // Add remaining projections
-        addProjections(gen, painting, remaining, 1, counter);
       }
     }
   }
@@ -263,7 +268,11 @@ public class PaintingUI extends JPanel {
     List<ColorModel> colorModels = new ArrayList<>(colors);
 
     for (int i = 0; i < colors; i++) {
-      colorModels.add(new PlainColorModel(ColorUtil.getRandomColor(random)));
+      if (Math.random() < CHANCE_OF_GRADIENT_COLOR) {
+        colorModels.add(new GradientColorModel(ColorUtil.getRandomColor(random), ColorUtil.getRandomColor(random), getHeight(), getWidth()));
+      } else {
+        colorModels.add(new PlainColorModel(ColorUtil.getRandomColor(random)));
+      }
     }
     return colorModels;
   }
