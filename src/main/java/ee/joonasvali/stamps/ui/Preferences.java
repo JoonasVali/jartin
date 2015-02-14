@@ -9,7 +9,7 @@ public class Preferences {
   public static final int WIDTH = getMonitorWidth();
   public static final int HEIGHT = getMonitorHeight();
   public static final int NUMBER_OF_COLORS = 2;
-  public static final int STAMP_COUNT_DEMULTIPLIER = 2500;
+  public static final int STAMP_COUNT_DEMULTIPLIER = 4500;
   public static final int STAMP_GROUPS_COUNT = 6;
   public static final int STAMPS_PER_GROUP = 20;
   public static final boolean SPINE_MODE = false;

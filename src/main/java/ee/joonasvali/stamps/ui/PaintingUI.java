@@ -33,7 +33,6 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Joonas Vali
@@ -164,8 +163,8 @@ public class PaintingUI extends JPanel {
     ProgressCounter counter = new ProgressCounter(progressListener, projections);
     if (!showSpine) {
       try {
-        painting.startPainting();
-        addProjections(gen, painting, projections, Runtime.getRuntime().availableProcessors(), counter);
+        painting.startPainting(counter);
+        addProjections(gen, painting, projections, Runtime.getRuntime().availableProcessors());
       } finally {
         painting.stopPainting();
       }
@@ -182,12 +181,11 @@ public class PaintingUI extends JPanel {
     }
   }
 
-  private void addProjections(ProjectionGenerator gen, Painting painting, int projections, int processors, ProgressCounter counter) {
+  private void addProjections(ProjectionGenerator gen, Painting painting, int projections, int processors) {
     if (processors <= 1) {
       // SINGLETHREADED LOGIC
       for (int i = 0; i < projections; i++) {
         painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
-        counter.increase();
       }
     } else {
       // MULTITHREADED LOGIC
@@ -198,7 +196,6 @@ public class PaintingUI extends JPanel {
         try {
           for (int i = 0; i < projectionsPerCore; i++) {
             painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
-            counter.increase();
           }
         } finally {
           latch.countDown();
@@ -210,7 +207,7 @@ public class PaintingUI extends JPanel {
 
       if (remaining > 0) {
         // Add remaining projections
-        addProjections(gen, painting, remaining, 1, counter);
+        addProjections(gen, painting, remaining, 1);
       }
 
       try {
@@ -301,21 +298,5 @@ public class PaintingUI extends JPanel {
 
   public void setProgressListener(ProgressListener listener) {
     this.progressListener = listener;
-  }
-
-  private class ProgressCounter {
-    private AtomicInteger count = new AtomicInteger();
-    private ProgressListener listener;
-    private int totalProjections;
-
-    public ProgressCounter(ProgressListener listener, int totalProjections) {
-      this.listener = listener;
-      this.totalProjections = totalProjections;
-    }
-
-    public void increase() {
-      int val = (int)((double)count.incrementAndGet() / (double)totalProjections * 100);
-      listener.setValue(val);
-    }
   }
 }
