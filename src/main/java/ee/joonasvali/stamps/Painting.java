@@ -5,6 +5,7 @@ import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.color.PositionAwareColor;
 import ee.joonasvali.stamps.color.PositionAwareColorModel;
 import ee.joonasvali.stamps.query.RandomQuery;
+import ee.joonasvali.stamps.ui.ProgressCounter;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -30,8 +31,11 @@ public class Painting {
   private volatile boolean startPainting;
   private SynchronousQueue<BufferedImage> canvasSync;
 
+  private volatile ProgressCounter counter;
 
-  public void startPainting() {
+
+  public void startPainting(ProgressCounter counter) {
+    this.counter = counter;
     if (startPainting) {
       System.err.println("Illegal state in Painting, can't call startPainting");
       System.exit(-1);
@@ -102,6 +106,7 @@ public class Painting {
             Projection projection = projections.take();
             if (projection == POISON_PILL) break;
             projection.paintTo(canvas);
+            counter.increase();
           } catch (InterruptedException e) {
             // Nothing to do
           }
