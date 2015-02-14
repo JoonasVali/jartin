@@ -56,8 +56,8 @@ public class PaintingUI extends JPanel {
   private Query<ColorModel> colorModelQuery = getColorModelQuery();
   private Query<Color> colorQuery = RandomQuery.create();
 
-  private Pallette pallette;
-  private StampProvider stamps;
+  private volatile Pallette pallette;
+  private volatile StampProvider stamps;
 
   private BufferedImage lastImage;
 
@@ -163,12 +163,23 @@ public class PaintingUI extends JPanel {
 
     ProgressCounter counter = new ProgressCounter(progressListener, projections);
     if (!showSpine) {
-      addProjections(gen, painting, projections, Runtime.getRuntime().availableProcessors(), counter);
+      try {
+        painting.startPainting();
+        addProjections(gen, painting, projections, Runtime.getRuntime().availableProcessors(), counter);
+      } finally {
+        painting.stopPainting();
+      }
+
     } else {
       paintLines(colorModelQuery, painting);
     }
 
-    lastImage = painting.getImage();
+    try {
+      lastImage = painting.getImage();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
   }
 
   private void addProjections(ProjectionGenerator gen, Painting painting, int projections, int processors, ProgressCounter counter) {
@@ -215,7 +226,13 @@ public class PaintingUI extends JPanel {
       return;
     }
     BinaryFormula formula = ((XYFormulaQuery) q).getFormula();
-    BufferedImage image = painting.getImage();
+    BufferedImage image = null;
+    try {
+      image = painting.getImage();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
 
     for (int i = 0; i < image.getWidth(); i++) {
       for (int j = 0; j < image.getHeight(); j++) {
