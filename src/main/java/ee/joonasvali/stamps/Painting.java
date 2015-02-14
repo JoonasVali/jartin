@@ -17,10 +17,14 @@ import java.util.concurrent.SynchronousQueue;
  * @author Joonas Vali
  */
 public class Painting {
-  private Executor executor = Executors.newSingleThreadExecutor();
+  private static final Projection POISON_PILL = canvas -> {
+    // Nothing to do
+  };
+
   private static RandomQuery<ColorModel> colorModelChooser = RandomQuery.create();
   private static RandomQuery<Color> colorChooser = RandomQuery.create();
 
+  private Executor executor = Executors.newSingleThreadExecutor();
   private final ArrayBlockingQueue<Projection> projections;
   private volatile BufferedImage canvas;
   private final int width, height;
@@ -44,6 +48,7 @@ public class Painting {
       System.exit(-1);
     }
     startPainting = false;
+    projections.add(POISON_PILL);
   }
 
 
@@ -97,6 +102,7 @@ public class Painting {
         while (startPainting || projections.size() > 0) {
           try {
             Projection projection = projections.take();
+            if (projection == POISON_PILL) break;
             projection.paintTo(canvas);
           } catch (InterruptedException e) {
             // Nothing to do
