@@ -32,7 +32,9 @@ public class ImageUtil {
     }
     BufferedImage img = image.getSubimage(startX, startY, endX - startX, endY - startY); //fill in the corners of the desired crop location here
     BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
-    Graphics g = copyOfImage.createGraphics();
+    Graphics2D g = copyOfImage.createGraphics();
+    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     g.drawImage(img, 0, 0, null);
     return copyOfImage;
   }

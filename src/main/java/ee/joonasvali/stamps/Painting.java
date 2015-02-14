@@ -17,9 +17,7 @@ import java.util.concurrent.SynchronousQueue;
  * @author Joonas Vali
  */
 public class Painting {
-  private static final Projection POISON_PILL = canvas -> {
-    // Nothing to do
-  };
+  private static final Projection POISON_PILL = canvas -> { /* Nothing to do */ };
 
   private static RandomQuery<ColorModel> colorModelChooser = RandomQuery.create();
   private static RandomQuery<Color> colorChooser = RandomQuery.create();

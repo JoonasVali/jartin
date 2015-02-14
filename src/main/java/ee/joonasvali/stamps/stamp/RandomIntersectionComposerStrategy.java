@@ -42,8 +42,8 @@ public class RandomIntersectionComposerStrategy extends NumberedRandomComposerSt
 
   private void transform(BufferedImage image, BufferedImage imageTransformed, double rotation, int totalWidth, int totalHeight) {
     Graphics2D g1 = (Graphics2D) imageTransformed.getGraphics();
-    g1.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-        RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    g1.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    g1.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     AffineTransform tr1 = new AffineTransform();
     tr1.setToTranslation(totalWidth / 2d - image.getWidth() / 2d, totalHeight / 2d -  image.getHeight() / 2d);
     tr1.rotate(rotation, image.getWidth() / 2, image.getHeight() / 2);
