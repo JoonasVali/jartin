@@ -8,36 +8,63 @@ import ee.joonasvali.stamps.query.RandomQuery;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * @author Joonas Vali
  */
 public class Painting {
+  private Executor executor = Executors.newSingleThreadExecutor();
   private static RandomQuery<ColorModel> colorModelChooser = RandomQuery.create();
   private static RandomQuery<Color> colorChooser = RandomQuery.create();
 
-  private final ArrayList<Projection> projections;
+  private final ArrayBlockingQueue<Projection> projections;
   private volatile BufferedImage canvas;
   private final int width, height;
   private final Pallette pallette;
+  private volatile boolean startPainting;
+  private SynchronousQueue<BufferedImage> canvasSync;
+
+
+  public void startPainting() {
+    if (startPainting) {
+      System.err.println("Illegal state in Painting, can't call startPainting");
+      System.exit(-1);
+    }
+    startPainting = true;
+    executor.execute(getAction());
+  }
+
+  public void stopPainting() {
+    if (!startPainting) {
+      System.err.println("Illegal state in Painting, can't call stopPainting");
+      System.exit(-1);
+    }
+    startPainting = false;
+  }
+
 
   public Painting(int width, int height, Pallette pallette, int projections) {
     this.width = width;
     this.height = height;
     this.pallette = pallette;
-    this.projections = new ArrayList<>(projections);
+    this.projections = new ArrayBlockingQueue<>(projections);
+    this.canvasSync = new SynchronousQueue<>();
+
   }
 
   public synchronized void addProjection(Projection projection) {
     projections.add(projection);
   }
 
-  private void paint() {
+  private void paintBackground() {
     canvas = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
     ColorModel colorModel = pallette.getColor(colorModelChooser);
-    if(colorModel instanceof PositionAwareColorModel) {
-      PositionAwareColorModel bgModel = (PositionAwareColorModel)colorModel;
+    if (colorModel instanceof PositionAwareColorModel) {
+      PositionAwareColorModel bgModel = (PositionAwareColorModel) colorModel;
       PositionAwareColor bgColor = bgModel.getColor();
 
       for (int i = 0; i < this.width; i++) {
@@ -54,15 +81,34 @@ public class Painting {
         }
       }
     }
-
-    for (Projection projection : projections) {
-      projection.paintTo(canvas);
-    }
   }
 
 
-  public BufferedImage getImage() {
-    if (canvas == null) paint();
-    return canvas;
+  public BufferedImage getImage() throws InterruptedException {
+    return canvasSync.take();
+  }
+
+  public Runnable getAction() {
+    return new Runnable() {
+      @Override
+      public void run() {
+
+        paintBackground();
+        while (startPainting || projections.size() > 0) {
+          try {
+            Projection projection = projections.take();
+            projection.paintTo(canvas);
+          } catch (InterruptedException e) {
+            // Nothing to do
+          }
+        }
+
+        try {
+          canvasSync.put(canvas);
+        } catch (InterruptedException e) {
+          System.exit(-1);
+        }
+      }
+    };
   }
 }
