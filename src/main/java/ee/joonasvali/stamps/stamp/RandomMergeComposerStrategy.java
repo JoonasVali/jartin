@@ -48,6 +48,7 @@ public class RandomMergeComposerStrategy extends NumberedRandomComposerStrategy 
   private void draw(BufferedImage image1, int maxDimension, Graphics2D g) {
     g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
         RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     AffineTransform transform = new AffineTransform();
     double scale = Math.max(Math.random(), 0.8);
 

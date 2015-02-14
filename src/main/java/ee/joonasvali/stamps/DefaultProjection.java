@@ -58,8 +58,8 @@ public class DefaultProjection implements Projection {
 
   public void paintTo(BufferedImage canvas) {
     Graphics2D g1 = (Graphics2D)canvas.getGraphics();
-    g1.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-        RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    g1.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    g1.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     AffineTransform at = new AffineTransform();
     at.setToTranslation(x, y);
     at.scale(scale, scale);
