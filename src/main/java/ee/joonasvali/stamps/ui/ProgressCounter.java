@@ -19,4 +19,8 @@ public class ProgressCounter {
     int val = (int)((double)count.incrementAndGet() / (double)totalProjections * 100);
     listener.setValue(val);
   }
+
+  public void clear() {
+    count.set(0);
+  }
 }

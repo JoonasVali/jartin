@@ -112,6 +112,7 @@ public class Painting {
           }
         }
 
+        counter.clear();
         try {
           canvasSync.put(canvas);
         } catch (InterruptedException e) {
