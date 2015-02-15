@@ -50,7 +50,13 @@ public class Painting {
       System.exit(-1);
     }
     startPainting = false;
-    projections.add(POISON_PILL);
+
+    try {
+      projections.put(POISON_PILL);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
   }
 
 
@@ -64,7 +70,12 @@ public class Painting {
   }
 
   public synchronized void addProjection(Projection projection) {
-    projections.add(projection);
+    try {
+      projections.put(projection);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
   }
 
   private void paintBackground() {
