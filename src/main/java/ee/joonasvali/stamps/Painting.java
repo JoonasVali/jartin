@@ -64,7 +64,7 @@ public class Painting {
     this.width = width;
     this.height = height;
     this.pallette = pallette;
-    this.projections = new ArrayBlockingQueue<>(projections);
+    this.projections = new ArrayBlockingQueue<>(projections + 1);
     this.canvasSync = new SynchronousQueue<>();
 
   }
