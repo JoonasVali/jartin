@@ -3,6 +3,8 @@ package ee.joonasvali.stamps.stamp;
 import ee.joonasvali.stamps.properties.MetadataReader;
 import ee.joonasvali.stamps.query.Query;
 import ee.joonasvali.stamps.query.RandomQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +17,7 @@ import java.util.List;
  * @author Joonas Vali
  */
 public class GroupedStamps {
+  public static final Logger log = LoggerFactory.getLogger(GroupedStamps.class);
   public static final String STAMPS_PROPERTIES = "stamps.properties";
 
   private final File mainfolder;
@@ -41,7 +44,7 @@ public class GroupedStamps {
           StampGroupMetadata metadata = reader.loadMetadata(props);
           stamps.setMetadata(metadata);
         } catch (IOException e) {
-          e.printStackTrace();
+          log.error(e.getMessage(), e);
         }
       }
 
@@ -66,7 +69,7 @@ public class GroupedStamps {
     List<Stamps> picked = new ArrayList<>(groups);
     for (int i = 0; i < groups; i++) {
       if (copy.isEmpty()) {
-        System.err.println("Ran out of stamp groups at index " + (i + 1) + ", before could pick " + groups);
+        log.error("Ran out of stamp groups at index " + (i + 1) + ", before could pick " + groups);
         return flatten(picked, stampsPerGroup, stampQuery, fillGroups);
       }
 

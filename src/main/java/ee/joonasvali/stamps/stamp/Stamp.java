@@ -5,6 +5,8 @@ import ee.joonasvali.stamps.Projection;
 import ee.joonasvali.stamps.ProjectionFactory;
 import ee.joonasvali.stamps.code.ThreadSafe;
 import ee.joonasvali.stamps.properties.AppProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,7 +23,7 @@ import java.util.concurrent.FutureTask;
 
 
 public class Stamp {
-
+  public static final Logger log = LoggerFactory.getLogger(Stamp.class);
   private volatile StampGroupMetadata metadata = new StampGroupMetadata();
   private volatile BufferedImage img = null;
   private final ConcurrentHashMap<Color, Future<BufferedImage>> renders = new ConcurrentHashMap<>();
@@ -50,8 +52,7 @@ public class Stamp {
     try {
       path = file.getCanonicalPath();
     } catch (IOException e) {
-      e.printStackTrace();
-      System.err.println("Fuck your permissions, I'm out.");
+      log.error("Fuck your permissions, I'm out.", e);
       System.exit(-1);
     }
     Future<Stamp> stamp = cache.get(path);
@@ -75,7 +76,7 @@ public class Stamp {
     try {
       return stamp.get();
     } catch (InterruptedException | ExecutionException e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
       System.exit(-1);
       // Satisfy compiler;
       return null;
@@ -107,7 +108,7 @@ public class Stamp {
     try {
       return factory.getProjectionFromRaw(image.get());
     } catch (InterruptedException | ExecutionException e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
       throw new RuntimeException(e);
     }
   }
@@ -153,8 +154,7 @@ public class Stamp {
       try {
         img = ImageUtil.trim(ImageIO.read(file), Color.WHITE);
       } catch (IOException e) {
-        e.printStackTrace();
-        System.err.println("Fuck your permissions, I'm out.");
+        log.error("Fuck your permissions, I'm out.", e);
         System.exit(-1);
       }
     }

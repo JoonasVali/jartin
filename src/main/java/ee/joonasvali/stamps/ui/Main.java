@@ -2,6 +2,8 @@ package ee.joonasvali.stamps.ui;
 
 import ee.joonasvali.stamps.meta.Metadata;
 import ee.joonasvali.stamps.properties.AppProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -14,7 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 
 public class Main {
-
+  public static final Logger log = LoggerFactory.getLogger(Main.class);
 
   private volatile JFrame frame;
   private volatile PaintingUI ui = new PaintingUI();
@@ -52,7 +54,7 @@ public class Main {
     controlPanel.add(settings);
     JCheckBox box1 = new JCheckBox("Reuse color", false);
     JCheckBox box2 = new JCheckBox("Reuse brushes", false);
-    JCheckBox box3 = new JCheckBox("Reuse perspective", false);
+    JCheckBox box3 = new JCheckBox("Reuse spine", false);
 
     box1.addActionListener(getBocActionListener(box1, ui::setRetainColors));
     box2.addActionListener(getBocActionListener(box2, ui::setRetainStamps));
@@ -107,7 +109,7 @@ public class Main {
       ImageIO.write(bi, "png", outputfile);
       JOptionPane.showMessageDialog(frame, "File saved to " + outputfile.getAbsolutePath());
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
     }
   }
 

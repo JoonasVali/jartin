@@ -23,6 +23,8 @@ import ee.joonasvali.stamps.stamp.RandomMergeComposerStrategy;
 import ee.joonasvali.stamps.stamp.Stamp;
 import ee.joonasvali.stamps.stamp.StampProvider;
 import ee.joonasvali.stamps.stamp.Stamps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,6 +42,7 @@ import java.util.concurrent.Executors;
  */
 public class PaintingUI extends JPanel {
 
+  public static Logger log = LoggerFactory.getLogger(PaintingUI.class);
   public static final double CHANCE_OF_GRADIENT_COLOR = 0.7;
 
   private ExecutorService generalGeneratorExecutor = Executors.newSingleThreadExecutor();
@@ -68,6 +71,7 @@ public class PaintingUI extends JPanel {
   }
 
   private void initEmpty() {
+    log.debug("Start initializing PaintingUI");
     lastImage = new BufferedImage(prefs.getWidth(), prefs.getHeight(), BufferedImage.TYPE_INT_RGB);
     Graphics2D g = (Graphics2D) lastImage.getGraphics();
     g.setColor(Color.LIGHT_GRAY);
@@ -90,6 +94,7 @@ public class PaintingUI extends JPanel {
       i += 15;
     }
     g.drawString("Press \"Generate\" to generate your first image.", 50, i + 60);
+    log.debug("Stop initializing PaintingUI");
   }
 
   public BufferedImage getLastImage() {
@@ -120,22 +125,27 @@ public class PaintingUI extends JPanel {
   }
 
   private void clearCaches() {
+    log.info("Clearing Caches");
     Stamp.clearCache();
     stampPool.clearCaches();
   }
 
   private StampProvider createStamps() {
     if (stamps == null || !retainStamps) {
+      log.info("Generating stamps");
       Stamps loadedStamps = stampPool.getStamps(prefs.getStampGroupsCount(), prefs.getStampsPerGroup(), RandomQuery.create(), RandomQuery.create(), false);
       CompositeStamps compositeStamps = new CompositeStamps(loadedStamps, new RandomIntersectionComposerStrategy((int) (Math.random() * 10)));
       compositeStamps = new CompositeStamps(compositeStamps, new RandomMergeComposerStrategy((int) (Math.random() * 10)));
       return compositeStamps;
     } else {
+      log.debug("Skip generating stamps");
       return stamps;
     }
   }
 
   private synchronized void init() {
+    long startTime = System.currentTimeMillis();
+    log.info("Starting generating a new image");
     int x = prefs.getWidth();
     int y = prefs.getHeight();
 
@@ -143,16 +153,18 @@ public class PaintingUI extends JPanel {
 
     if (pallette == null || !retainColors) {
       pallette = new Pallette(generateColorModels(new Random()));
+    } else {
+      log.debug("Skip generating color models");
     }
 
     ProjectionGenerator gen = new ProjectionGenerator(x, y, stamps, pallette);
 
     int projections = (x * y / prefs.getStampCountDemultiplier());
+    log.info("Number of projections: " + projections);
     Painting painting = new Painting(x, y, pallette, projections);
 
 
     boolean showSpine = prefs.isSpineMode();
-
     if (stampQuery == null || colorModelQuery == null || colorQuery == null || !retainSpine) {
       stampQuery = getStampQuery();
       colorModelQuery = getColorModelQuery();
@@ -163,22 +175,27 @@ public class PaintingUI extends JPanel {
     ProgressCounter counter = new ProgressCounter(progressListener, projections);
     if (!showSpine) {
       try {
+        log.info("Start painting.");
         painting.startPainting(counter);
         addProjections(gen, painting, projections, Runtime.getRuntime().availableProcessors());
       } finally {
         painting.stopPainting();
+        log.info("Stop painting.");
       }
 
     } else {
+      log.warn("SPINE MODE!");
       paintLines(colorModelQuery, painting);
     }
 
     try {
       lastImage = painting.getImage();
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
       System.exit(-1);
     }
+    long endTime = System.currentTimeMillis();
+    log.info("Generating new image completed. Total time: " + (endTime - startTime) + " ms");
   }
 
   private void addProjections(ProjectionGenerator gen, Painting painting, int projections, int processors) {
@@ -213,7 +230,7 @@ public class PaintingUI extends JPanel {
       try {
         latch.await();
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        log.error(e.getMessage(), e);
       }
     }
   }
@@ -227,7 +244,7 @@ public class PaintingUI extends JPanel {
     try {
       image = painting.getImage();
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
       System.exit(-1);
     }
 
@@ -278,6 +295,7 @@ public class PaintingUI extends JPanel {
   }
 
   private List<ColorModel> generateColorModels(Random random) {
+    log.info("Generating color models");
     int colors = prefs.getNumberOfColors();
     List<ColorModel> colorModels = new ArrayList<>(colors);
 
