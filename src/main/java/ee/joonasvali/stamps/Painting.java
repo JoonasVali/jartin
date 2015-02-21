@@ -6,6 +6,8 @@ import ee.joonasvali.stamps.color.PositionAwareColor;
 import ee.joonasvali.stamps.color.PositionAwareColorModel;
 import ee.joonasvali.stamps.query.RandomQuery;
 import ee.joonasvali.stamps.ui.ProgressCounter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -18,6 +20,7 @@ import java.util.concurrent.SynchronousQueue;
  * @author Joonas Vali
  */
 public class Painting {
+  public static final Logger log = LoggerFactory.getLogger(Painting.class);
   private static final Projection POISON_PILL = canvas -> { /* Nothing to do */ };
 
   private static RandomQuery<ColorModel> colorModelChooser = RandomQuery.create();
@@ -37,7 +40,7 @@ public class Painting {
   public void startPainting(ProgressCounter counter) {
     this.counter = counter;
     if (startPainting) {
-      System.err.println("Illegal state in Painting, can't call startPainting");
+      log.error("Illegal state in Painting, can't call startPainting");
       System.exit(-1);
     }
     startPainting = true;
@@ -46,7 +49,7 @@ public class Painting {
 
   public void stopPainting() {
     if (!startPainting) {
-      System.err.println("Illegal state in Painting, can't call stopPainting");
+      log.error("Illegal state in Painting, can't call stopPainting");
       System.exit(-1);
     }
     startPainting = false;
@@ -54,7 +57,7 @@ public class Painting {
     try {
       projections.put(POISON_PILL);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
       System.exit(-1);
     }
   }
@@ -73,7 +76,7 @@ public class Painting {
     try {
       projections.put(projection);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
       System.exit(-1);
     }
   }

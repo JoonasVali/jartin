@@ -1,6 +1,8 @@
 package ee.joonasvali.stamps.properties;
 
 import ee.joonasvali.stamps.ui.Main;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -9,6 +11,7 @@ import java.util.function.Consumer;
  * @author Joonas Vali
  */
 public class AppProperties {
+  private static Logger logger = LoggerFactory.getLogger(AppProperties.class);
   private volatile String outputPath;
   private volatile String stampsDirPath;
   private boolean lazyLoading;
@@ -32,7 +35,7 @@ public class AppProperties {
 
     File file = new File(outputPath);
     if (file.isFile()) {
-      System.err.println("Output path '" + file + "' must be a folder!");
+      logger.error("Output path '" + file + "' must be a folder!");
       System.exit(-1);
     }
 
@@ -48,13 +51,13 @@ public class AppProperties {
     }
 
     if (!stampsDir.exists()) {
-      System.err.println("Stampdir '" + stampsDir + "' must be existing folder!");
+      logger.error("Stampdir '" + stampsDir + "' must be existing folder!");
       System.exit(-1);
     }
 
-    System.out.println("Stamps loaded from " + stampsDir);
-    System.out.println("Jartin output is " + outputPath);
-    System.out.println("Using lazy loading for stamps: " + lazyLoading);
+    logger.info("Stamps loaded from " + stampsDir);
+    logger.info("Jartin output is " + outputPath);
+    logger.info("Using lazy loading for stamps: " + lazyLoading);
   }
 
   private void loadBoolean(String key, Consumer<Boolean> setter) {

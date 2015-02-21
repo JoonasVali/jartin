@@ -1,6 +1,8 @@
 package ee.joonasvali.stamps.stamp;
 
 import ee.joonasvali.stamps.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.List;
  * @author Joonas Vali
  */
 public class Stamps implements StampProvider{
+  public static final Logger log = LoggerFactory.getLogger(Stamps.class);
   private final File folder;
   private volatile ArrayList<Stamp> stamps;
 
@@ -31,7 +34,7 @@ public class Stamps implements StampProvider{
       try {
         load(file);
       } catch(IllegalArgumentException e) {
-        System.err.println("Can't load Stamp from file " + file + " cause: '" + e.getMessage() + "'");
+        log.error("Can't load Stamp from file " + file + " cause: '" + e.getMessage() + "'", e);
       }
     }
   }

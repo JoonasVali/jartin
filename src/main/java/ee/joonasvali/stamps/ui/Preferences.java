@@ -1,11 +1,16 @@
 package ee.joonasvali.stamps.ui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.*;
 
 /**
  * @author Joonas Vali
  */
 public class Preferences {
+  public static final Logger log = LoggerFactory.getLogger(Preferences.class);
+
   public static final int WIDTH = getMonitorWidth();
   public static final int HEIGHT = getMonitorHeight();
   public static final int NUMBER_OF_COLORS = 2;
@@ -81,13 +86,13 @@ public class Preferences {
 
   private static int getMonitorWidth() {
     int width = (int)Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-    System.out.println("Resolution width detected: " + width + " px");
+    log.info("Resolution width detected: " + width + " px");
     return Math.max(width, 200);
   }
 
   private static int getMonitorHeight() {
     int height = (int)Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-    System.out.println("Resolution height detected: " + height + " px");
+    log.info("Resolution height detected: " + height + " px");
     return Math.max(height, 200);
   }
 }
