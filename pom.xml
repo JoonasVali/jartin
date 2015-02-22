@@ -30,6 +30,10 @@
     <resources>
       <resource>
         <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+      <resource>
+        <directory>src/main/resources/meta</directory>
         <filtering>true</filtering>
       </resource>
     </resources>
