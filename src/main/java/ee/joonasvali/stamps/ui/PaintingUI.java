@@ -85,7 +85,7 @@ public class PaintingUI extends JPanel {
 
     int i = 35;
     int processors = Runtime.getRuntime().availableProcessors();
-    g.drawString(Metadata.VERSION, 50, i);
+    g.drawString(Metadata.INSTANCE.getName() + " " + Metadata.INSTANCE.getVersion(), 50, i);
     g.drawString("Image size set to " + prefs.getWidth() + " : " + prefs.getHeight(), 50, i + 15);
     g.drawString("Total memory available to Java VM: " + max + " MB " + "(" + rating + ")", 50, i + 30);
     g.drawString("Number of processors available to Java VM: " + processors, 50, i + 45);
