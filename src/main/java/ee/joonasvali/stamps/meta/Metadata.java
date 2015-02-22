@@ -15,17 +15,15 @@ import java.util.Properties;
 public class Metadata {
   private static final String VERSION_KEY = "project.version";
   private static final String NAME_KEY = "project.name";
+  private static final String META_PROPERTIES = "/meta/meta.properties";
   public static final Metadata INSTANCE = new Metadata();
   public final Logger log = LoggerFactory.getLogger(Metadata.class);
 
   public final String VERSION;
   public final String NAME;
 
-
-
-
   public Metadata() {
-    File file = new File(ClassLoader.class.getResource("/meta.properties").getFile());
+    File file = new File(ClassLoader.class.getResource(META_PROPERTIES).getFile());
     Properties properties = new Properties();
     try (InputStream inputStream = new FileInputStream(file)) {
       properties.load(inputStream);

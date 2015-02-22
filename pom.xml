@@ -13,8 +13,6 @@
     <name>Jartin</name>
   </properties>
 
-
-
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>
