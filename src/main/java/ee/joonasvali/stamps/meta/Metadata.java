@@ -15,12 +15,14 @@ import java.util.Properties;
 public class Metadata {
   private static final String VERSION_KEY = "project.version";
   private static final String NAME_KEY = "project.name";
+  private static final String AUTHOR_KEY = "project.author";
   private static final String META_PROPERTIES = "/meta/meta.properties";
   public static final Metadata INSTANCE = new Metadata();
   public final Logger log = LoggerFactory.getLogger(Metadata.class);
 
   public final String VERSION;
   public final String NAME;
+  public final String AUTHOR;
 
   public Metadata() {
     File file = new File(ClassLoader.class.getResource(META_PROPERTIES).getFile());
@@ -34,12 +36,14 @@ public class Metadata {
 
     String version = properties.getProperty(VERSION_KEY);
     String name = properties.getProperty(NAME_KEY);
+    String author = properties.getProperty(AUTHOR_KEY);
 
     if(version == null || name == null) {
       log.error("name or version == null | name = " + name + ", version = " + version);
       System.exit(-1);
     }
 
+    AUTHOR = author;
     VERSION = version;
     NAME = name;
   }
@@ -50,5 +54,9 @@ public class Metadata {
 
   public String getName() {
     return NAME;
+  }
+
+  public String getAuthor() {
+    return AUTHOR;
   }
 }
