@@ -1,5 +1,6 @@
 package ee.joonasvali.stamps.ui;
 
+import ee.joonasvali.stamps.code.Util;
 import ee.joonasvali.stamps.meta.Metadata;
 import ee.joonasvali.stamps.properties.AppProperties;
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ public class Main {
   public static final Logger log = LoggerFactory.getLogger(Main.class);
 
   private volatile JFrame frame;
-  private volatile PaintingUI ui = new PaintingUI();
+  private volatile PaintingUI ui;
   private volatile AppProperties properties = AppProperties.getInstance();
 
   public static void main(String[] args) throws InvocationTargetException, InterruptedException {
@@ -38,6 +39,13 @@ public class Main {
 
     JPanel panel = new JPanel(new BorderLayout());
     frame.getContentPane().add(panel);
+
+
+    JProgressBar progressBar = new JProgressBar(SwingConstants.HORIZONTAL, 0, 100);
+    progressBar.setStringPainted(true);
+    ProgressBarUpdateUtility progressUtility = new ProgressBarUpdateUtility(progressBar);
+
+    ui = new PaintingUI(new PaintingController(), progressUtility);
     JScrollPane scrollPane = new JScrollPane(ui, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     HandScrollListener scrollListener = new HandScrollListener(ui);
     scrollPane.getViewport().addMouseMotionListener(scrollListener);
@@ -70,18 +78,17 @@ public class Main {
     controlPanel.add(new JSeparator(JSeparator.VERTICAL));
     controlPanel.add(box3);
 
-    JProgressBar progressBar = new JProgressBar(SwingConstants.HORIZONTAL, 0, 100);
-    progressBar.setStringPainted(true);
-    ProgressBarUpdateUtility progressUtility = new ProgressBarUpdateUtility(progressBar);
-    ui.setProgressListener(progressUtility);
-
     JButton generate = new JButton("Generate");
     generate.addActionListener(
         s -> {
+          // On button press:
           generate.setEnabled(false);
-          ui.onReinit(() -> {
-            scrollPane.revalidate();
+          ui.generate(() -> {
+            // After generation:
+            Util.assertEDT();
+            ui.commitImage();
             progressUtility.setValue(0);
+            scrollPane.revalidate();
             generate.setEnabled(true);
           });
         }
