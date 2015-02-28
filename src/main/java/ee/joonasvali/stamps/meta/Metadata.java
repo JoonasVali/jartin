@@ -30,7 +30,8 @@ public class Metadata {
   public final String VERSION;
   public final String NAME;
   public final String AUTHOR;
-  public final String DATE;
+  public final Date BUILD_TIMESTAMP;
+
 
   public Metadata() {
     File file = new File(ClassLoader.class.getResource(META_PROPERTIES).getFile());
@@ -56,12 +57,11 @@ public class Metadata {
     AUTHOR = author;
     VERSION = version;
     NAME = name;
-    DATE = parseYear(timeString, timePattern);
+    BUILD_TIMESTAMP = parseDate(timeString, timePattern);
   }
 
-  private String parseYear(String timeString, String timePattern) {
+  private Date parseDate(String timeString, String timePattern) {
     DateFormat parser = new SimpleDateFormat(timePattern);
-    DateFormat yearFormatter = new SimpleDateFormat("yyyy");
     Date date = null;
     try {
       date = parser.parse(timeString);
@@ -72,7 +72,7 @@ public class Metadata {
       System.exit(-1);
     }
 
-    return yearFormatter.format(date);
+    return date;
   }
 
   public String getVersion() {
@@ -87,7 +87,8 @@ public class Metadata {
     return AUTHOR;
   }
 
-  public String getDate() {
-    return DATE;
+  public String getYear() {
+    DateFormat yearFormatter = new SimpleDateFormat("yyyy");
+    return yearFormatter.format(BUILD_TIMESTAMP);
   }
 }
