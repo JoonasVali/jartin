@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author Joonas Vali
  */
-public class XYFormulaQuery<C> extends PositionAwareQuery<C> {
+public class XYFormulaQuery<C> extends PositionAwareQuery<C> implements Query<C> {
   private final Query<C> query;
   private final BinaryQuery<C> binaryQuery;
   private final BinaryFormula formula;

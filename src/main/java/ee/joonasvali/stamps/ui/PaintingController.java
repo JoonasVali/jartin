@@ -9,6 +9,7 @@ import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.color.PlainColorModel;
 import ee.joonasvali.stamps.properties.AppProperties;
 import ee.joonasvali.stamps.query.BinaryFormula;
+import ee.joonasvali.stamps.query.BinaryFormulaGenerator;
 import ee.joonasvali.stamps.query.BinaryQuery;
 import ee.joonasvali.stamps.query.BinaryValue;
 import ee.joonasvali.stamps.query.Query;
@@ -42,6 +43,9 @@ public final class PaintingController {
   private static ExecutorService multiThreadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
   private final Preferences prefs = new Preferences();
+  private final BinaryFormulaGenerator colorFormulaGenerator;
+  private final BinaryFormulaGenerator stampFormulaGenerator;
+  private final BinaryFormulaGenerator colorModelFormulaGenerator;
 
   private volatile boolean retainColors = false;
   private volatile boolean retainStamps = false;
@@ -53,9 +57,15 @@ public final class PaintingController {
   private volatile Pallette pallette;
   private volatile StampProvider stamps;
 
-  private volatile Query<Stamp> stampQuery = getStampQuery();
-  private volatile Query<ColorModel> colorModelQuery = getColorModelQuery();
-  private volatile Query<Color> colorQuery = RandomQuery.create();
+  private volatile Query<Stamp> stampQuery;
+  private volatile Query<ColorModel> colorModelQuery;
+  private volatile Query<Color> colorQuery;
+
+  public PaintingController(BinaryFormulaGenerator colorModelFormulaGenerator, BinaryFormulaGenerator stampFormulaGenerator, BinaryFormulaGenerator colorFormulaGenerator) {
+    this.colorModelFormulaGenerator = colorModelFormulaGenerator;
+    this.stampFormulaGenerator = stampFormulaGenerator;
+    this.colorFormulaGenerator = colorFormulaGenerator;
+  }
 
   public void setRetainColors(boolean retainColors) {
     this.retainColors = retainColors;
@@ -98,9 +108,9 @@ public final class PaintingController {
 
     boolean showSpine = prefs.isSpineMode();
     if (stampQuery == null || colorModelQuery == null || colorQuery == null || !retainSpine) {
-      stampQuery = getStampQuery();
-      colorModelQuery = getColorModelQuery();
-      colorQuery = getColorQuery();
+      stampQuery = generateXYFormulaQuery(stampFormulaGenerator);
+      colorModelQuery = generateXYFormulaQuery(colorModelFormulaGenerator);
+      colorQuery = generateXYFormulaQuery(colorFormulaGenerator);
     }
 
 
@@ -184,43 +194,14 @@ public final class PaintingController {
   }
 
 
-  private Query<ColorModel> getColorModelQuery() {
-    return new XYFormulaQuery(new RandomQuery(), new BinaryQuery(Math.random()), new ReversingCompoundBinaryFormula(generateFormula(), generateFormula()));
-  }
-
-  private Query<Stamp> getStampQuery() {
-    return new XYFormulaQuery(new RandomQuery(), new BinaryQuery(Math.random()), new ReversingCompoundBinaryFormula(generateFormula(), generateFormula()));
-  }
-
-  private Query<Color> getColorQuery() {
-    return new XYFormulaQuery(new RandomQuery(), new BinaryQuery(Math.random()), new ReversingCompoundBinaryFormula(generateFormula(), generateFormula()));
-  }
-
-  //TODO move elsewhere
-  private BinaryFormula generateFormula() {
-    int waves = (int) (Math.random() * 3 + 1);
-    BinaryFormula[] formulas = new BinaryFormula[waves];
-
-    for (int i = 0; i < waves; i++) {
-      double wavelength = Math.random() * (prefs.getWidth() / 400) + (prefs.getWidth() / 800);
-      double offset = Math.random() * Math.PI;
-      int movement = prefs.getHeight() / 2;
-      int n = (int) ((Math.random() * (prefs.getHeight() - movement)) + movement) - prefs.getHeight() / 4;
-
-      int slope = (int) (Math.random() * 200);
-
-      formulas[i] =
-          (x, y) -> {
-            double s = Math.sin(Math.toRadians(x / wavelength) + offset) * slope + n;
-            return y > s ? BinaryValue.ONE : BinaryValue.ZERO;
-          };
-
+  private <T> Query<T> generateXYFormulaQuery(BinaryFormulaGenerator generator) {
+    BinaryFormula[] formulas = new BinaryFormula[(int) (Math.random() * 2) + 1];
+    for(int i = 0; i < formulas.length; i++) {
+      formulas[i] = generator.generate(prefs);
     }
-    if (waves > 1) {
-      return new ReversingCompoundBinaryFormula(formulas);
-    } else {
-      return formulas[0];
-    }
+
+    ReversingCompoundBinaryFormula formula = new ReversingCompoundBinaryFormula(formulas);
+    return new XYFormulaQuery(new RandomQuery<T>(), new BinaryQuery<T>(Math.random()), formula);
   }
 
   private java.util.List<ColorModel> generateColorModels(Random random) {

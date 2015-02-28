@@ -72,7 +72,7 @@ public class Painting {
 
   }
 
-  public synchronized void addProjection(Projection projection) {
+  public void addProjection(Projection projection) {
     try {
       projections.put(projection);
     } catch (InterruptedException e) {
