@@ -35,7 +35,7 @@ public class Main {
 
   private void run() {
 
-    frame = new JFrame("(C) " + Metadata.INSTANCE.getName() + " " + Metadata.INSTANCE.getVersion() + " by " + Metadata.INSTANCE.AUTHOR + " " + Metadata.INSTANCE.getDate());
+    frame = new JFrame("(C) " + Metadata.INSTANCE.getName() + " " + Metadata.INSTANCE.getVersion() + " by " + Metadata.INSTANCE.AUTHOR + " " + Metadata.INSTANCE.getYear());
 
     JPanel panel = new JPanel(new BorderLayout());
     frame.getContentPane().add(panel);
