@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.SynchronousQueue;
 
@@ -26,7 +26,7 @@ public class Painting {
   private static RandomQuery<ColorModel> colorModelChooser = RandomQuery.create();
   private static RandomQuery<Color> colorChooser = RandomQuery.create();
 
-  private Executor executor = Executors.newSingleThreadExecutor();
+  private ExecutorService executor = Executors.newSingleThreadExecutor();
   private final ArrayBlockingQueue<Projection> projections;
   private volatile BufferedImage canvas;
   private final int width, height;
@@ -60,6 +60,8 @@ public class Painting {
       log.error(e.getMessage(), e);
       System.exit(-1);
     }
+
+    executor.shutdown();
   }
 
 

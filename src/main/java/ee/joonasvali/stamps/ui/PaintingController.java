@@ -101,12 +101,17 @@ public final class PaintingController {
 
     ProjectionGenerator gen = new ProjectionGenerator(x, y, stamps, pallette);
 
-    int projections = (x * y / prefs.getStampCountDemultiplier());
-    log.info("Number of projections: " + projections);
+    boolean showSpine = prefs.isSpineMode();
+
+    int projections = 0;
+    if (!showSpine) {
+      projections = (x * y / prefs.getStampCountDemultiplier());
+      log.info("Number of projections: " + projections);
+    }
+
     Painting painting = new Painting(x, y, pallette, projections);
 
 
-    boolean showSpine = prefs.isSpineMode();
     if (stampQuery == null || colorModelQuery == null || colorQuery == null || !retainSpine) {
       stampQuery = generateXYFormulaQuery(stampFormulaGenerator);
       colorModelQuery = generateXYFormulaQuery(colorModelFormulaGenerator);
@@ -127,7 +132,7 @@ public final class PaintingController {
 
     } else {
       log.warn("SPINE MODE!");
-      paintLines(colorModelQuery, painting);
+      return paintLines(colorModelQuery);
     }
 
     long endTime = System.currentTimeMillis();
@@ -195,12 +200,7 @@ public final class PaintingController {
 
 
   private <T> Query<T> generateXYFormulaQuery(BinaryFormulaGenerator generator) {
-    BinaryFormula[] formulas = new BinaryFormula[(int) (Math.random() * 2) + 1];
-    for(int i = 0; i < formulas.length; i++) {
-      formulas[i] = generator.generate(prefs);
-    }
-
-    ReversingCompoundBinaryFormula formula = new ReversingCompoundBinaryFormula(formulas);
+    ReversingCompoundBinaryFormula formula = new ReversingCompoundBinaryFormula(generator.generate(prefs));
     return new XYFormulaQuery(new RandomQuery<T>(), new BinaryQuery<T>(Math.random()), formula);
   }
 
@@ -223,18 +223,14 @@ public final class PaintingController {
     return prefs;
   }
 
-  private void paintLines(Query<?> q, Painting painting) {
+  private BufferedImage paintLines(Query<?> q) {
+    BufferedImage image = new BufferedImage(getPrefs().getWidth(), getPrefs().getHeight(), BufferedImage.TYPE_INT_RGB);
     if (!(q instanceof XYFormulaQuery)) {
-      return;
-    }
-    BinaryFormula formula = ((XYFormulaQuery) q).getFormula();
-    BufferedImage image = null;
-    try {
-      image = painting.getImage();
-    } catch (InterruptedException e) {
-      log.error(e.getMessage(), e);
+      log.error("Invalid query for paintLines");
       System.exit(-1);
     }
+
+    BinaryFormula formula = ((XYFormulaQuery) q).getFormula();
 
     for (int i = 0; i < image.getWidth(); i++) {
       for (int j = 0; j < image.getHeight(); j++) {
@@ -242,6 +238,9 @@ public final class PaintingController {
         image.setRGB(i, j, color.getRGB());
       }
     }
+
+    return image;
+
   }
 
 }
