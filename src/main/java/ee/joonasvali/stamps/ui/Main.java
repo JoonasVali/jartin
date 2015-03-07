@@ -80,20 +80,26 @@ public class Main {
     controlPanel.add(box3);
 
     JButton generate = new JButton("Generate");
+
     generate.addActionListener(
         s -> {
-          // On button press:
-          generate.setEnabled(false);
-          ui.generate(() -> {
-            // After generation:
-            Util.assertEDT();
-            ui.commitImage();
-            progressUtility.setValue(0);
-            scrollPane.revalidate();
-            generate.setEnabled(true);
-          });
+          if (!ui.isExecuting()) {
+            // On button press:
+            generate.setText("Cancel");
+            ui.generate(() -> {
+              // After generation:
+              Util.assertEDT();
+              ui.commitImage();
+              progressUtility.setValue(0);
+              scrollPane.revalidate();
+              generate.setText("Generate");
+            });
+          } else {
+            ui.cancel(() -> generate.setText("Generate"));
+          }
         }
     );
+
     controlPanel.add(generate);
     controlPanel.add(progressBar);
 

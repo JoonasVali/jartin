@@ -33,6 +33,7 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author Joonas Vali
@@ -85,6 +86,9 @@ public final class PaintingController {
     stampPool.clearCaches();
   }
 
+  /**
+   * @return Image or null if cancelled
+   */
   public synchronized BufferedImage generateImage(ProgressListener listener) {
     long startTime = System.currentTimeMillis();
     log.info("Starting generating a new image");
@@ -125,9 +129,16 @@ public final class PaintingController {
         log.info("Start painting.");
         painting.startPainting(counter);
         addProjections(gen, painting, projections, Runtime.getRuntime().availableProcessors());
-      } finally {
-        painting.stopPainting();
-        log.info("Stop painting.");
+      }
+      finally {
+        try {
+          painting.stopPainting();
+          log.info("Stop painting.");
+        } catch (InterruptedException e) {
+          log.info("Painting cancelled.");
+          counter.clear();
+          return null;
+        }
       }
 
     } else {
@@ -141,9 +152,9 @@ public final class PaintingController {
     try {
       return painting.getImage();
     } catch (InterruptedException e) {
-      log.error(e.getMessage(), e);
-      System.exit(-1);
-      // Satisfy compiler
+      log.info("Painting cancelled.");
+      counter.clear();
+      Thread.currentThread().interrupt();
       return null;
     }
   }
@@ -170,6 +181,7 @@ public final class PaintingController {
     } else {
       // MULTITHREADED LOGIC
       CountDownLatch latch = new CountDownLatch(projections);
+
       Runnable runnable = () -> {
         try {
           painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
@@ -178,14 +190,21 @@ public final class PaintingController {
         }
       };
 
+      ArrayList<Future> futures = new ArrayList<>(projections);
       for (int i = 0; i < projections; i++) {
-        multiThreadExecutor.execute(runnable);
+        futures.add(multiThreadExecutor.submit(runnable));
       }
 
       try {
         latch.await();
       } catch (InterruptedException e) {
-        log.error(e.getMessage(), e);
+        for(Future future : futures) {
+          if(!future.isDone() && !future.isCancelled()) {
+            future.cancel(true);
+          }
+        }
+        painting.cancel();
+        Thread.currentThread().interrupt();
       }
     }
   }
