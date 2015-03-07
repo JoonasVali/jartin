@@ -30,7 +30,7 @@ public class ProjectionGenerator {
     this.canvasY = canvasY;
   }
 
-  public Projection generate(Query<Stamp> stampQuery, Query<ColorModel> colorModelQuery, Query<Color> colorQuery) {
+  public Projection generate(Query<Stamp> stampQuery, Query<ColorModel> colorModelQuery, Query<Color> colorQuery) throws InterruptedException {
     // This is the actual place where calculation of every projection scale, rotation and position takes place
     int x = (int) (Math.random() * (canvasX + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
     int y = (int) (Math.random() * (canvasY + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
