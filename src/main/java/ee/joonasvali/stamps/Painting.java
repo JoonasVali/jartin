@@ -47,10 +47,9 @@ public class Painting {
     executor.execute(getAction());
   }
 
-  public void stopPainting() {
+  public void stopPainting() throws InterruptedException {
     if (!startPainting) {
-      log.error("Illegal state in Painting, can't call stopPainting");
-      System.exit(-1);
+      throw new InterruptedException("Painting already stopped");
     }
     startPainting = false;
 
@@ -78,8 +77,7 @@ public class Painting {
     try {
       projections.put(projection);
     } catch (InterruptedException e) {
-      log.error(e.getMessage(), e);
-      System.exit(-1);
+      return;
     }
   }
 
@@ -106,6 +104,15 @@ public class Painting {
     }
   }
 
+  public void cancel() {
+    projections.clear();
+    try {
+      stopPainting();
+    } catch (InterruptedException e) {
+      log.error("This shouldn't happen", e);
+      System.exit(-1);
+    }
+  }
 
   public BufferedImage getImage() throws InterruptedException {
     return canvasSync.take();

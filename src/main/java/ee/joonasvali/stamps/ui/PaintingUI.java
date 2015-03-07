@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author Joonas Vali
@@ -23,6 +24,7 @@ public class PaintingUI extends JPanel {
   private final ProgressListener progressListener;
   private final PaintingController controller;
   private volatile BufferedImage lastImage;
+  private volatile Future executingTask;
 
   public PaintingUI(PaintingController controller, ProgressListener listener) {
     this.progressListener = listener;
@@ -75,10 +77,14 @@ public class PaintingUI extends JPanel {
   }
 
   public void generate(final Runnable after) {
-    generalGeneratorExecutor.execute(() -> {
+    executingTask = generalGeneratorExecutor.submit(() -> {
       controller.clearCaches();
-      lastImage = controller.generateImage(progressListener);
+      BufferedImage image =  controller.generateImage(progressListener);
+      if (image != null) {
+        lastImage = image;
+      }
       SwingUtilities.invokeLater(after);
+      executingTask = null;
     });
   }
 
@@ -90,5 +96,17 @@ public class PaintingUI extends JPanel {
 
   public Preferences getPrefs() {
     return controller.getPrefs();
+  }
+
+  public boolean isExecuting() {
+    return executingTask != null;
+  }
+
+  public void cancel(final Runnable after) {
+    Future task = executingTask;
+    if (task != null) {
+      task.cancel(true);
+      after.run();
+    }
   }
 }
