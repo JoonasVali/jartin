@@ -18,6 +18,7 @@ import java.util.concurrent.Future;
  */
 public class PaintingUI extends JPanel {
 
+  public static final int DATA_MARGIN_FROM_EDGE = 50;
   public static Logger log = LoggerFactory.getLogger(PaintingUI.class);
 
   private final ExecutorService generalGeneratorExecutor = Executors.newSingleThreadExecutor();
@@ -33,6 +34,8 @@ public class PaintingUI extends JPanel {
     this.add(new JLabel(new ImageIcon(lastImage)));
   }
 
+
+
   private void initEmpty() {
     log.debug("Start initializing PaintingUI");
     lastImage = new BufferedImage(getPrefs().getWidth(), getPrefs().getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -46,17 +49,20 @@ public class PaintingUI extends JPanel {
       rating = "could use more";
     }
 
-    int i = 35;
+    Increaser inc = new Increaser(35, 15);
     int processors = Runtime.getRuntime().availableProcessors();
-    g.drawString(Metadata.INSTANCE.getName() + " " + Metadata.INSTANCE.getVersion(), 50, i);
-    g.drawString("Image size set to " + getPrefs().getWidth() + " : " + getPrefs().getHeight(), 50, i + 15);
-    g.drawString("Total memory available to Java VM: " + max + " MB " + "(" + rating + ")", 50, i + 30);
-    g.drawString("Number of processors available to Java VM: " + processors, 50, i + 45);
+    g.drawString(Metadata.INSTANCE.getName() + " " + Metadata.INSTANCE.getVersion(), DATA_MARGIN_FROM_EDGE, inc.getNext());
+    g.drawString("Image size set to " + getPrefs().getWidth() + " : " + getPrefs().getHeight(), DATA_MARGIN_FROM_EDGE, inc.getNext());
+    g.drawString("Total memory available to Java VM: " + max + " MB " + "(" + rating + ")", DATA_MARGIN_FROM_EDGE, inc.getNext());
+    g.drawString("OS Architecture: " + System.getProperty("os.arch"), DATA_MARGIN_FROM_EDGE, inc.getNext());
+    g.drawString("JVM Bits: " + System.getProperty("sun.arch.data.model"), DATA_MARGIN_FROM_EDGE, inc.getNext());
+
+
+    g.drawString("Number of processors available to Java VM: " + processors, DATA_MARGIN_FROM_EDGE, inc.getNext());
     if(AppProperties.getInstance().isLazyLoading()) {
-      g.drawString("Using lazy loading for stamps (Slower but conserves memory).", 50, i + 60);
-      i += 15;
+      g.drawString("Using lazy loading for stamps (Slower but conserves memory).", DATA_MARGIN_FROM_EDGE, inc.getNext());
     }
-    g.drawString("Press \"Generate\" to generate your first image.", 50, i + 60);
+    g.drawString("Press \"Generate\" to generate your first image.", DATA_MARGIN_FROM_EDGE, inc.getNext());
     log.debug("Stop initializing PaintingUI");
   }
 
@@ -107,6 +113,22 @@ public class PaintingUI extends JPanel {
     if (task != null) {
       task.cancel(true);
       after.run();
+    }
+  }
+
+  private class Increaser {
+    private int count;
+    private int increase;
+
+    private Increaser(int initialCount, int increase) {
+      this.count = initialCount;
+      this.increase = increase;
+    }
+
+    public int getNext() {
+      int val = count;
+      count += increase;
+      return count;
     }
   }
 }
