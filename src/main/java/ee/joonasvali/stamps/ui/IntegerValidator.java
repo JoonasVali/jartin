@@ -1,6 +1,6 @@
 package ee.joonasvali.stamps.ui;
 
-import javax.swing.*;
+import java.util.function.Supplier;
 
 /**
  * @author Joonas Vali
@@ -9,22 +9,22 @@ public class IntegerValidator implements Validator{
   private final int minValue;
   private final int maxValue;
   private final String name;
-  private final JTextField input;
+  private final Supplier<Integer> input;
 
-  public IntegerValidator(JTextField input, int minValue, int maxValue, String name) {
+  public IntegerValidator(Supplier<Integer> getter, int minValue, int maxValue, String name) {
     this.minValue = minValue;
     this.maxValue = maxValue;
     this.name = name;
-    this.input = input;
+    this.input = getter;
   }
 
   @Override
   public String validate() {
     int val;
     try {
-      val = Integer.parseInt(input.getText());
+      val = input.get();
     } catch (Exception e) {
-      return name + " has an invalid value: '" + input.getText() + "'";
+      return name + " has an invalid value: '" + input.get() + "'";
     }
     if (minValue > val) {
       return name + " value " + val + " can't be smaller than " + minValue;
