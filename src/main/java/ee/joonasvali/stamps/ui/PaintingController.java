@@ -90,6 +90,8 @@ public final class PaintingController {
    * @return Image or null if cancelled
    */
   public synchronized BufferedImage generateImage(ProgressListener listener) {
+    Backup backup = new Backup(pallette, stamps, stampQuery, colorModelQuery, colorQuery);
+
     long startTime = System.currentTimeMillis();
     log.info("Starting generating a new image");
     int x = prefs.getWidth();
@@ -128,7 +130,11 @@ public final class PaintingController {
       try {
         log.info("Start painting.");
         painting.startPainting(counter);
-        addProjections(gen, painting, projections, Runtime.getRuntime().availableProcessors());
+        try {
+          addProjections(gen, painting, projections, Runtime.getRuntime().availableProcessors());
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+        }
       }
       finally {
         try {
@@ -137,6 +143,7 @@ public final class PaintingController {
         } catch (InterruptedException e) {
           log.info("Painting cancelled.");
           counter.clear();
+          backup.revert();
           return null;
         }
       }
@@ -154,7 +161,7 @@ public final class PaintingController {
     } catch (InterruptedException e) {
       log.info("Painting cancelled.");
       counter.clear();
-      Thread.currentThread().interrupt();
+      backup.revert();
       return null;
     }
   }
@@ -172,7 +179,7 @@ public final class PaintingController {
     }
   }
 
-  private void addProjections(ProjectionGenerator gen, Painting painting, int projections, int processors) {
+  private void addProjections(ProjectionGenerator gen, Painting painting, int projections, int processors) throws InterruptedException{
     if (processors <= 1) {
       // SINGLETHREADED LOGIC
       for (int i = 0; i < projections; i++) {
@@ -185,6 +192,8 @@ public final class PaintingController {
       Runnable runnable = () -> {
         try {
           painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
         } finally {
           latch.countDown();
         }
@@ -254,4 +263,50 @@ public final class PaintingController {
 
   }
 
+
+  private class Backup {
+    private Pallette pallette;
+    private StampProvider stamps;
+    private Query<Stamp> stampQuery;
+    private Query<ColorModel> colorModelQuery;
+    private Query<Color> colorQuery;
+
+    public Backup(Pallette pallette, StampProvider stamps, Query<Stamp> stampQuery, Query<ColorModel> colorModelQuery, Query<Color> colorQuery) {
+      this.pallette = pallette;
+      this.stamps = stamps;
+      this.stampQuery = stampQuery;
+      this.colorModelQuery = colorModelQuery;
+      this.colorQuery = colorQuery;
+    }
+
+    private Pallette getPallette() {
+      return pallette;
+    }
+
+    private StampProvider getStamps() {
+      return stamps;
+    }
+
+    private Query<Stamp> getStampQuery() {
+      return stampQuery;
+    }
+
+    private Query<ColorModel> getColorModelQuery() {
+      return colorModelQuery;
+    }
+
+    private Query<Color> getColorQuery() {
+      return colorQuery;
+    }
+
+    public void revert() {
+      log.info("Reverting data from backup");
+      PaintingController.this.colorQuery = colorQuery;
+      PaintingController.this.stamps = stamps;
+      PaintingController.this.pallette = pallette;
+      PaintingController.this.colorModelQuery = colorModelQuery;
+      PaintingController.this.stampQuery = stampQuery;
+    }
+  }
 }
+
