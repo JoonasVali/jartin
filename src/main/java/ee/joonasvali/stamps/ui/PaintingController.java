@@ -169,25 +169,17 @@ public final class PaintingController {
       }
     } else {
       // MULTITHREADED LOGIC
-      CountDownLatch latch = new CountDownLatch(processors);
-      int projectionsPerCore = projections / processors;
-      int remaining = projections % processors;
+      CountDownLatch latch = new CountDownLatch(projections);
       Runnable runnable = () -> {
         try {
-          for (int i = 0; i < projectionsPerCore; i++) {
-            painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
-          }
+          painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
         } finally {
           latch.countDown();
         }
       };
-      for (int i = 0; i < processors; i++) {
-        multiThreadExecutor.execute(runnable);
-      }
 
-      if (remaining > 0) {
-        // Add remaining projections
-        addProjections(gen, painting, remaining, 1);
+      for (int i = 0; i < projections; i++) {
+        multiThreadExecutor.execute(runnable);
       }
 
       try {
