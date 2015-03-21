@@ -23,8 +23,6 @@ public class PreferencesPanel extends JPanel {
   private final JLabel errors = new JLabel();
   private final List<Validator> validatorList = new LinkedList<>();
   private final List<ActionListener> onSave = new LinkedList<>();
-  private Dictionary demultiplierDictionary;
-
 
   public PreferencesPanel(Preferences preferences, ActionListener closeAction) {
     this.closeAction = closeAction;
