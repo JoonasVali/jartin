@@ -1,6 +1,6 @@
 package ee.joonasvali.stamps.properties;
 
-import ee.joonasvali.stamps.ui.Main;
+import ee.joonasvali.stamps.code.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public class AppProperties {
     if (stampsDirPath != null) {
       stampsDir = new File(stampsDirPath);
     } else {
-      stampsDir = new File(Main.class.getResource("/stamps").getFile());
+      stampsDir = new File(Util.getUserDir(), "stamps");
     }
 
     if (!stampsDir.exists()) {

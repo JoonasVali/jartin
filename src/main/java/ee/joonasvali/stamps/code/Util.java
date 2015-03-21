@@ -16,4 +16,8 @@ public class Util {
       System.exit(-1);
     }
   }
+
+  public static String getUserDir() {
+    return System.getProperty("user.dir");
+  }
 }
