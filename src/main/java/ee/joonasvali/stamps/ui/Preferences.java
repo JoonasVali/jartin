@@ -1,5 +1,6 @@
 package ee.joonasvali.stamps.ui;
 
+import ee.joonasvali.stamps.code.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +9,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -42,11 +42,11 @@ public class Preferences {
 
 
   public Preferences () {
-    URL path = Preferences.class.getResource("/" + PREF_FILE_NAME);
-    if (path == null) {
+    File prefs = new File(Util.getUserDir(), PREF_FILE_NAME);
+    if (!prefs.exists()) {
       log.error("Preferences file " + PREF_FILE_NAME + " not found.");
     } else {
-      loadPreferences(new File(path.getFile()));
+      loadPreferences(prefs);
     }
   }
 

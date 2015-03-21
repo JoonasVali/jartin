@@ -3,8 +3,6 @@ package ee.joonasvali.stamps.meta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -34,9 +32,8 @@ public class Metadata {
 
 
   public Metadata() {
-    File file = new File(ClassLoader.class.getResource(META_PROPERTIES).getFile());
     Properties properties = new Properties();
-    try (InputStream inputStream = new FileInputStream(file)) {
+    try (InputStream inputStream = ClassLoader.class.getResourceAsStream(META_PROPERTIES)) {
       properties.load(inputStream);
     } catch (IOException e) {
       log.error(e.getMessage(), e);
