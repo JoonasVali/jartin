@@ -105,7 +105,7 @@ public final class PaintingController {
       log.debug("Skip generating color models");
     }
 
-    ProjectionGenerator gen = new ProjectionGenerator(x, y, stamps, pallette);
+    ProjectionGenerator gen = new ProjectionGenerator(x, y, stamps, pallette, new Random());
 
     boolean showSpine = prefs.isSpineMode();
 
@@ -194,6 +194,8 @@ public final class PaintingController {
           painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
+        } catch (Exception e) {
+          log.error("Projection adding failed", e);
         } finally {
           latch.countDown();
         }
