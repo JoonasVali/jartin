@@ -23,7 +23,7 @@
     -->
     <fileSet>
       <directory>${binfolder}</directory>
-      <outputDirectory></outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <includes>
         <include>**/*</include>
       </includes>
@@ -44,9 +44,9 @@
     -->
     <fileSet>
       <directory>${project.build.directory}</directory>
-      <outputDirectory></outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <includes>
-        <include>stamps.jar</include>
+        <include>jartin.jar</include>
       </includes>
     </fileSet>
   </fileSets>

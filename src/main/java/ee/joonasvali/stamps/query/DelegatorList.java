@@ -1,7 +1,5 @@
 package ee.joonasvali.stamps.query;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -58,12 +56,12 @@ public class DelegatorList<E> implements List<E> {
 
   @Override
   public boolean add(E e) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean remove(Object o) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -73,27 +71,27 @@ public class DelegatorList<E> implements List<E> {
 
   @Override
   public boolean addAll(Collection<? extends E> c) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean addAll(int index, Collection<? extends E> c) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean removeAll(Collection<?> c) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean retainAll(Collection<?> c) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public void clear() {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -106,17 +104,17 @@ public class DelegatorList<E> implements List<E> {
 
   @Override
   public E set(int index, E element) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public void add(int index, E element) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public E remove(int index) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
 
   @Override

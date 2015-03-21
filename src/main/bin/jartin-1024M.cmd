@@ -1,1 +1,1 @@
-java -jar -Djartin.stamps=.\stamps -Djartin.output=.\out -Xmx1024M stamps.jar 
+java -jar -Djartin.stamps=.\stamps -Djartin.output=.\out -Xmx1024M jartin.jar 
