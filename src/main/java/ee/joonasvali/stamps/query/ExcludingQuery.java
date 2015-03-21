@@ -40,4 +40,13 @@ public class ExcludingQuery<T> implements Query<T> {
       return query.get(list);
     }
   }
+
+  /**
+   *
+   * @param ob excludes the added object
+   * @return true if object was not yet excluded
+   */
+  public boolean addExclusion(T ob) {
+    return exclude.add(ob);
+  }
 }
