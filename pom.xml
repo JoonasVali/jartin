@@ -20,6 +20,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.10</version>
@@ -41,6 +46,7 @@
         </excludes>
       </resource>
     </resources>
+    <finalName>jartin</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -51,18 +57,33 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <!--
+                  Specifies that all dependencies of our application are found
+                  from the lib directory.
+              -->
+              <classpathPrefix>lib/</classpathPrefix>
+              <mainClass>ee.joonasvali.stamps.ui.Main</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
 
         <configuration>
-          <archive>
-            <manifest>
-              <mainClass>ee.joonasvali.stamps.ui.Main</mainClass>
-            </manifest>
-          </archive>
           <descriptors>
             <descriptor>src/main/assembly/assembly.xml</descriptor>
           </descriptors>
+
           <finalName>stamps</finalName>
           <appendAssemblyId>false</appendAssemblyId>
         </configuration>
