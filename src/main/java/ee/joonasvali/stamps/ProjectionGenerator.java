@@ -1,14 +1,17 @@
 package ee.joonasvali.stamps;
 
 import ee.joonasvali.stamps.color.ColorModel;
-import ee.joonasvali.stamps.color.PositionAwareColorModel;
 import ee.joonasvali.stamps.color.Pallette;
+import ee.joonasvali.stamps.color.PositionAwareColorModel;
+import ee.joonasvali.stamps.query.ExcludingQuery;
 import ee.joonasvali.stamps.query.PositionAwareQuery;
 import ee.joonasvali.stamps.query.Query;
 import ee.joonasvali.stamps.stamp.Stamp;
 import ee.joonasvali.stamps.stamp.StampProvider;
 
 import java.awt.*;
+import java.util.Collections;
+import java.util.Random;
 
 /**
  * @author Joonas Vali
@@ -22,8 +25,10 @@ public class ProjectionGenerator {
   private final Pallette pallette;
   private final int canvasX;
   private final int canvasY;
+  private final Random random;
 
-  public ProjectionGenerator(int canvasX, int canvasY, StampProvider stamps, Pallette pallette) {
+  public ProjectionGenerator(int canvasX, int canvasY, StampProvider stamps, Pallette pallette, Random random) {
+    this.random = random;
     this.stamps = stamps;
     this.pallette = pallette;
     this.canvasX = canvasX;
@@ -32,10 +37,10 @@ public class ProjectionGenerator {
 
   public Projection generate(Query<Stamp> stampQuery, Query<ColorModel> colorModelQuery, Query<Color> colorQuery) throws InterruptedException {
     // This is the actual place where calculation of every projection scale, rotation and position takes place
-    int x = (int) (Math.random() * (canvasX + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
-    int y = (int) (Math.random() * (canvasY + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
-    double scale = Math.max(Math.random(), SCALE_MIN_VALUE);
-    double rotation = (int) (Math.random() * 360);
+    int x = (int) (random.nextDouble() * (canvasX + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
+    int y = (int) (random.nextDouble() * (canvasY + OUT_OF_SIGHT_MARGIN)) - OUT_OF_SIGHT_MARGIN;
+    double scale = Math.max(random.nextDouble(), SCALE_MIN_VALUE);
+    double rotation = (int) (random.nextDouble() * 360);
 
     // We provide the calculated positions for each query, so it will be position aware and can make decision based on it.
     providePositions(stampQuery, x, y, scale, rotation);
@@ -46,11 +51,13 @@ public class ProjectionGenerator {
     // Defined through stamps.properties, default = 1
     double rarity = stamp.getMetadata().getRarity();
     if(rarity < 1 && Math.random() > rarity && rarity > 0) {
-      return generate(stampQuery, colorModelQuery, colorQuery);
+      // try to get some other stamp
+      stamp = stamps.getStamp(new ExcludingQuery<>(stampQuery, Collections.singleton(stamp)));
     }
 
     DefaultProjection projection;
     ColorModel colorModel = pallette.getColor(colorModelQuery);
+    // TODO these decisions probably could be abstracted?
     if (colorModel instanceof PositionAwareColorModel) {
       PositionAwareColorModel mColor = (PositionAwareColorModel)colorModel;
       projection = (DefaultProjection) stamp.getProjection(mColor.getColor(), x, y);

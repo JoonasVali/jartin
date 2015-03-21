@@ -22,6 +22,7 @@ public abstract class PositionAwareQuery<T> implements Query<T> {
 
   @Override
   public T get(List<T> list) {
+    if (list.isEmpty()) throw new RuntimeException("provided list empty");
     if (!argumentsSet) throw new IllegalStateException("Must provide arguments first!");
     return getUsingPosition(list);
   }

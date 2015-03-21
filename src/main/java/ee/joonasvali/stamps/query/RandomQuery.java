@@ -13,6 +13,7 @@ public class RandomQuery<T> implements Query<T> {
 
   @Override
   public T get(List<T> list) {
+    if (list.isEmpty()) throw new RuntimeException("provided list empty");
     return list.get((int) (Math.random() * list.size()));
   }
 }

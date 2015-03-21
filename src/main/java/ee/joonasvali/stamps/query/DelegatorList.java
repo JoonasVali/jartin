@@ -11,6 +11,8 @@ import java.util.ListIterator;
  * Temporary access object.
  * References the original list, so adding or removing anything from it crashes something probably.
  *
+ * TODO this list is so stupid it should be removed and find a solid way to achieve the same thing.
+ *
  * @author Joonas Vali
  */
 public class DelegatorList<E> implements List<E> {
@@ -31,7 +33,7 @@ public class DelegatorList<E> implements List<E> {
 
   @Override
   public boolean isEmpty() {
-    return end > start;
+    return original.size() > 0 && end <= start;
   }
 
   @Override
