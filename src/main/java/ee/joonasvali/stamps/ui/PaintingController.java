@@ -170,6 +170,7 @@ public final class PaintingController {
     if (stamps == null || !retainStamps) {
       log.info("Generating stamps");
       Stamps loadedStamps = stampPool.getStamps(prefs.getStampGroupsCount(), prefs.getStampsPerGroup(), RandomQuery.create(), RandomQuery.create(), false);
+      // TODO, this composite thing should be more dynamic. (What's the number 10?)
       CompositeStamps compositeStamps = new CompositeStamps(loadedStamps, new RandomIntersectionComposerStrategy((int) (Math.random() * 10)));
       compositeStamps = new CompositeStamps(compositeStamps, new RandomMergeComposerStrategy((int) (Math.random() * 10)));
       return compositeStamps;
