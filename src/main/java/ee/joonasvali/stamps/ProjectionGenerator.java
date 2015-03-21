@@ -3,14 +3,13 @@ package ee.joonasvali.stamps;
 import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.color.PositionAwareColorModel;
-import ee.joonasvali.stamps.query.ExcludingQuery;
+import ee.joonasvali.stamps.query.DynamicExcludingQuery;
 import ee.joonasvali.stamps.query.PositionAwareQuery;
 import ee.joonasvali.stamps.query.Query;
 import ee.joonasvali.stamps.stamp.Stamp;
 import ee.joonasvali.stamps.stamp.StampProvider;
 
 import java.awt.*;
-import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -47,19 +46,19 @@ public class ProjectionGenerator {
     providePositions(colorModelQuery, x, y, scale, rotation);
     providePositions(colorQuery, x, y, scale, rotation);
 
-    Stamp stamp = stamps.getStamp(stampQuery);
-    // Defined through stamps.properties, default = 1
-    double rarity = stamp.getMetadata().getRarity();
-    if(rarity < 1 && Math.random() > rarity && rarity > 0) {
-      // try to get some other stamp
-      stamp = stamps.getStamp(new ExcludingQuery<>(stampQuery, Collections.singleton(stamp)));
-    }
+    // DynamicExcludingQuery helps us to get some other stamp if the "rarity check" fails
+    Stamp stamp = stamps.getStamp(new DynamicExcludingQuery<>(stampQuery, ob -> {
+      // Defined through stamps.properties, default = 1
+      double rarity = ob.getMetadata().getRarity();
+      return !(rarity < 1 && random.nextDouble() > rarity && rarity > 0);
+    }));
+
 
     DefaultProjection projection;
     ColorModel colorModel = pallette.getColor(colorModelQuery);
     // TODO these decisions probably could be abstracted?
     if (colorModel instanceof PositionAwareColorModel) {
-      PositionAwareColorModel mColor = (PositionAwareColorModel)colorModel;
+      PositionAwareColorModel mColor = (PositionAwareColorModel) colorModel;
       projection = (DefaultProjection) stamp.getProjection(mColor.getColor(), x, y);
       projection.setScale(scale);
       projection.setRotation((int) rotation);
@@ -69,11 +68,11 @@ public class ProjectionGenerator {
       Color color = colorModel.getColor(colorQuery);
       int MULTIPLIER = 2;
       int i = (int) (Math.random() * 2 * MULTIPLIER - MULTIPLIER);
-      if(i < 0) {
-        for(; i < 0; i++)
+      if (i < 0) {
+        for (; i < 0; i++)
           color = color.brighter();
       } else {
-        for(; i > 0; i--)
+        for (; i > 0; i--)
           color = color.darker();
       }
 
@@ -90,7 +89,7 @@ public class ProjectionGenerator {
   }
 
   private void providePositions(Query<?> query, int x, int y, double scale, double rotation) {
-    if(query instanceof PositionAwareQuery) {
+    if (query instanceof PositionAwareQuery) {
       ((PositionAwareQuery) query).provide(x, y, scale, rotation);
     }
   }
