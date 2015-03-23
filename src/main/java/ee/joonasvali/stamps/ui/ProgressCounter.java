@@ -22,5 +22,10 @@ public class ProgressCounter {
 
   public void clear() {
     count.set(0);
+    listener.setValue(0);
+  }
+
+  public void setValue(String message) {
+    listener.setValue(message);
   }
 }

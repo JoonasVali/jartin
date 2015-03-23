@@ -5,4 +5,5 @@ package ee.joonasvali.stamps.ui;
  */
 public interface ProgressListener {
   public void setValue(int value);
+  public void setValue(String s);
 }

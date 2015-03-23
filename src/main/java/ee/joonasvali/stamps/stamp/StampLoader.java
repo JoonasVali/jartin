@@ -3,6 +3,7 @@ package ee.joonasvali.stamps.stamp;
 import ee.joonasvali.stamps.properties.MetadataReader;
 import ee.joonasvali.stamps.query.Query;
 import ee.joonasvali.stamps.query.RandomQuery;
+import ee.joonasvali.stamps.ui.ProgressCounter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +19,8 @@ import java.util.concurrent.Executors;
 /**
  * @author Joonas Vali
  */
-public class GroupedStamps {
-  public static final Logger log = LoggerFactory.getLogger(GroupedStamps.class);
+public class StampLoader {
+  public static final Logger log = LoggerFactory.getLogger(StampLoader.class);
   public static final String STAMPS_PROPERTIES = "stamps.properties";
   private final ExecutorService bootExecutor = Executors.newSingleThreadExecutor();
 
@@ -27,17 +28,20 @@ public class GroupedStamps {
   private final ArrayList<Stamps> stampsGroups;
   private volatile boolean loaded = false;
 
-  public GroupedStamps(File mainfolder) {
-    if (!mainfolder.exists() || !mainfolder.isDirectory()) throw new IllegalArgumentException("Folder " + mainfolder + " must be dir");
+  public StampLoader(File mainfolder) {
+    if (!mainfolder.exists() || !mainfolder.isDirectory())
+      throw new IllegalArgumentException("Folder " + mainfolder + " must be dir");
     this.mainfolder = mainfolder;
     this.stampsGroups = new ArrayList<>();
   }
 
   public void loadStampsConcurrently() {
-    bootExecutor.execute(() -> {
-      loadStamps();
-      bootExecutor.shutdown();
-    });
+    if (!bootExecutor.isShutdown()) {
+      bootExecutor.execute(() -> {
+        loadStamps();
+        bootExecutor.shutdown();
+      });
+    }
   }
 
   private synchronized void loadStamps() {
@@ -49,11 +53,11 @@ public class GroupedStamps {
     MetadataReader reader = new MetadataReader();
     File[] files = mainfolder.listFiles((dir, name) -> dir.isDirectory());
     stampsGroups.ensureCapacity(files.length);
-    for (File file : files) {
-      Stamps stamps = new Stamps(file);
+    for (File dir : files) {
+      Stamps stamps = new Stamps(dir);
       stampsGroups.add(stamps);
 
-      File props = new File(file, STAMPS_PROPERTIES);
+      File props = new File(dir, STAMPS_PROPERTIES);
       if (props.isFile()) {
         try {
           StampGroupMetadata metadata = reader.loadMetadata(props);
@@ -76,8 +80,8 @@ public class GroupedStamps {
    * @param fillGroups
    * @return
    */
-  public Stamps getStamps(int groups, int stampsPerGroup, Query<Stamps> groupQuery, Query<Stamp> stampQuery, boolean fillGroups) {
-    init();
+  public Stamps getStamps(int groups, int stampsPerGroup, Query<Stamps> groupQuery, Query<Stamp> stampQuery, boolean fillGroups, ProgressCounter listener) {
+    init(listener);
     boolean remove = true;
     if (groupQuery instanceof RandomQuery) {
       groupQuery = getRandomRemovingQuery();
@@ -100,9 +104,16 @@ public class GroupedStamps {
     return flatten(picked, stampsPerGroup, stampQuery, fillGroups);
   }
 
-  private void init() {
+  private void init(ProgressCounter listener) {
     if (!loaded) {
+      if (listener != null) {
+        listener.setValue("Loading stamps...");
+      }
       loadStamps();
+
+      if (listener != null) {
+        listener.clear();
+      }
     }
   }
 
@@ -134,7 +145,7 @@ public class GroupedStamps {
   }
 
   public void clearCaches() {
-    init();
+    init(null);
     stampsGroups.forEach(s -> s.getStamps().forEach(Stamp::clearRenderCache));
   }
 }

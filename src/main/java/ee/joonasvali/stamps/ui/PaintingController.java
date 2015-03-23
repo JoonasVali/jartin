@@ -17,7 +17,7 @@ import ee.joonasvali.stamps.query.RandomQuery;
 import ee.joonasvali.stamps.query.ReversingCompoundBinaryFormula;
 import ee.joonasvali.stamps.query.XYFormulaQuery;
 import ee.joonasvali.stamps.stamp.CompositeStamps;
-import ee.joonasvali.stamps.stamp.GroupedStamps;
+import ee.joonasvali.stamps.stamp.StampLoader;
 import ee.joonasvali.stamps.stamp.RandomIntersectionComposerStrategy;
 import ee.joonasvali.stamps.stamp.RandomMergeComposerStrategy;
 import ee.joonasvali.stamps.stamp.Stamp;
@@ -52,7 +52,7 @@ public final class PaintingController {
   private volatile boolean retainStamps = false;
   private volatile boolean retainSpine = false;
 
-  private final GroupedStamps stampPool = new GroupedStamps(AppProperties.getInstance().getStampsDir());
+  private final StampLoader stampPool = new StampLoader(AppProperties.getInstance().getStampsDir());
 
   private volatile Pallette pallette;
   private volatile StampProvider stamps;
@@ -97,7 +97,16 @@ public final class PaintingController {
     int x = prefs.getWidth();
     int y = prefs.getHeight();
 
-    stamps = createStamps();
+    boolean showSpine = prefs.isSpineMode();
+    int projections = 0;
+
+    if (!showSpine) {
+      projections = (x * y / prefs.getStampCountDemultiplier());
+      log.info("Number of projections: " + projections);
+    }
+
+    ProgressCounter counter = new ProgressCounter(listener, projections);
+    stamps = createStamps(counter);
 
     if (pallette == null || !retainColors) {
       pallette = new Pallette(generateColorModels(new Random()));
@@ -106,15 +115,6 @@ public final class PaintingController {
     }
 
     ProjectionGenerator gen = new ProjectionGenerator(x, y, stamps, pallette, new Random());
-
-    boolean showSpine = prefs.isSpineMode();
-
-    int projections = 0;
-    if (!showSpine) {
-      projections = (x * y / prefs.getStampCountDemultiplier());
-      log.info("Number of projections: " + projections);
-    }
-
     Painting painting = new Painting(x, y, pallette, projections);
 
 
@@ -125,7 +125,7 @@ public final class PaintingController {
     }
 
 
-    ProgressCounter counter = new ProgressCounter(listener, projections);
+
     if (!showSpine) {
       try {
         log.info("Start painting.");
@@ -166,10 +166,10 @@ public final class PaintingController {
     }
   }
 
-  private StampProvider createStamps() {
+  private StampProvider createStamps(ProgressCounter counter) {
     if (stamps == null || !retainStamps) {
       log.info("Generating stamps");
-      Stamps loadedStamps = stampPool.getStamps(prefs.getStampGroupsCount(), prefs.getStampsPerGroup(), RandomQuery.create(), RandomQuery.create(), false);
+      Stamps loadedStamps = stampPool.getStamps(prefs.getStampGroupsCount(), prefs.getStampsPerGroup(), RandomQuery.create(), RandomQuery.create(), false, counter);
       // TODO, this composite thing should be more dynamic. (What's the number 10?)
       CompositeStamps compositeStamps = new CompositeStamps(loadedStamps, new RandomIntersectionComposerStrategy((int) (Math.random() * 10)));
       compositeStamps = new CompositeStamps(compositeStamps, new RandomMergeComposerStrategy((int) (Math.random() * 10)));
