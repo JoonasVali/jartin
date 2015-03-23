@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Joonas Vali
@@ -19,18 +21,31 @@ import java.util.List;
 public class GroupedStamps {
   public static final Logger log = LoggerFactory.getLogger(GroupedStamps.class);
   public static final String STAMPS_PROPERTIES = "stamps.properties";
+  private final ExecutorService bootExecutor = Executors.newSingleThreadExecutor();
 
   private final File mainfolder;
   private final ArrayList<Stamps> stampsGroups;
+  private volatile boolean loaded = false;
 
   public GroupedStamps(File mainfolder) {
     if (!mainfolder.exists() || !mainfolder.isDirectory()) throw new IllegalArgumentException("Folder " + mainfolder + " must be dir");
     this.mainfolder = mainfolder;
     this.stampsGroups = new ArrayList<>();
-    loadStamps();
   }
 
-  private void loadStamps() {
+  public void loadStampsConcurrently() {
+    bootExecutor.execute(() -> {
+      loadStamps();
+      bootExecutor.shutdown();
+    });
+  }
+
+  private synchronized void loadStamps() {
+    if (loaded) {
+      return;
+    }
+    long begin = System.currentTimeMillis();
+    log.info("Starting to load stamps.");
     MetadataReader reader = new MetadataReader();
     File[] files = mainfolder.listFiles((dir, name) -> dir.isDirectory());
     stampsGroups.ensureCapacity(files.length);
@@ -47,8 +62,10 @@ public class GroupedStamps {
           log.error(e.getMessage(), e);
         }
       }
-
     }
+    loaded = true;
+    long time = System.currentTimeMillis() - begin;
+    log.info("Stamps loaded in " + time + "ms.");
   }
 
   /**
@@ -60,6 +77,7 @@ public class GroupedStamps {
    * @return
    */
   public Stamps getStamps(int groups, int stampsPerGroup, Query<Stamps> groupQuery, Query<Stamp> stampQuery, boolean fillGroups) {
+    init();
     boolean remove = true;
     if (groupQuery instanceof RandomQuery) {
       groupQuery = getRandomRemovingQuery();
@@ -80,6 +98,12 @@ public class GroupedStamps {
       picked.add(s);
     }
     return flatten(picked, stampsPerGroup, stampQuery, fillGroups);
+  }
+
+  private void init() {
+    if (!loaded) {
+      loadStamps();
+    }
   }
 
   private Stamps flatten(List<Stamps> picked, int stampsPerGroup, Query<Stamp> stampQuery, boolean fillGroups) {
@@ -110,6 +134,7 @@ public class GroupedStamps {
   }
 
   public void clearCaches() {
+    init();
     stampsGroups.forEach(s -> s.getStamps().forEach(Stamp::clearRenderCache));
   }
 }

@@ -52,8 +52,7 @@ public final class PaintingController {
   private volatile boolean retainStamps = false;
   private volatile boolean retainSpine = false;
 
-
-  private GroupedStamps stampPool = new GroupedStamps(AppProperties.getInstance().getStampsDir());
+  private final GroupedStamps stampPool = new GroupedStamps(AppProperties.getInstance().getStampsDir());
 
   private volatile Pallette pallette;
   private volatile StampProvider stamps;
@@ -66,6 +65,7 @@ public final class PaintingController {
     this.colorModelFormulaGenerator = colorModelFormulaGenerator;
     this.stampFormulaGenerator = stampFormulaGenerator;
     this.colorFormulaGenerator = colorFormulaGenerator;
+    stampPool.loadStampsConcurrently();
   }
 
   public void setRetainColors(boolean retainColors) {
