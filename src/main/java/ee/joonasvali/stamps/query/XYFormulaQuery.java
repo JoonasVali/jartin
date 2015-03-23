@@ -24,12 +24,4 @@ public class XYFormulaQuery<C> extends PositionAwareQuery<C> implements Query<C>
   public BinaryFormula getFormula() {
     return formula;
   }
-
-  /**
-   * Formula to calculate Y from X
-   * @param x param
-   * @return y param
-   */
-
-
 }
