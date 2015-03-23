@@ -52,7 +52,7 @@ public class Stamp {
     try {
       path = file.getCanonicalPath();
     } catch (IOException e) {
-      log.error("Fuck your permissions, I'm out.", e);
+      log.error("IOException for file: " + file, e);
       System.exit(-1);
     }
     Future<Stamp> stamp = cache.get(path);
@@ -157,7 +157,7 @@ public class Stamp {
       try {
         img = ImageUtil.trim(ImageIO.read(file), Color.WHITE);
       } catch (IOException e) {
-        log.error("Fuck your permissions, I'm out.", e);
+        log.error("IOException for image " + file, e);
         System.exit(-1);
       }
     }
