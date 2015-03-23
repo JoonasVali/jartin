@@ -26,6 +26,7 @@ public class PaintingUI extends JPanel {
   private final PaintingController controller;
   private volatile BufferedImage lastImage;
   private volatile Future executingTask;
+  private volatile boolean isEmptyImage = true;
 
   public PaintingUI(PaintingController controller, ProgressListener listener) {
     this.progressListener = listener;
@@ -84,13 +85,17 @@ public class PaintingUI extends JPanel {
 
   public void generate(final Runnable after) {
     executingTask = generalGeneratorExecutor.submit(() -> {
-      controller.clearCaches();
+      if (!isEmptyImage) {
+        controller.clearCaches();
+      }
       BufferedImage image =  controller.generateImage(progressListener);
       if (image != null) {
         lastImage = image;
+        isEmptyImage = false;
       }
       SwingUtilities.invokeLater(after);
       executingTask = null;
+
     });
   }
 
