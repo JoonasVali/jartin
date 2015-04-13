@@ -45,7 +45,7 @@ public class DefaultProjectionFactory implements ProjectionFactory {
     return newImg;
   }
 
-  public synchronized static BufferedImage getRawProjectionImage(BufferedImage img, PositionAwareColor color, int x, int y) {
+  public static BufferedImage getRawProjectionImage(BufferedImage img, PositionAwareColor color, int x, int y) {
     BufferedImage newImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
     for (int i = 0; i < img.getHeight(); i++) {
       for (int j = 0; j < img.getWidth(); j++) {
