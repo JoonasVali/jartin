@@ -43,7 +43,7 @@ public class ProgressBarUpdateUtility implements ProgressListener {
   }
 
   @Override
-  public void setValue(String message) {
+  public synchronized void setValue(String message) {
     this.message = message;
     queued = false;
     SwingUtilities.invokeLater(this::paintValue);
