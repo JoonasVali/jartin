@@ -14,4 +14,5 @@ import java.util.List;
 public interface StampProvider {
   public Stamp getStamp(Query<Stamp> q);
   List<Stamp> getStamps();
+  public int size();
 }

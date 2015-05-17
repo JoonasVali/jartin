@@ -135,6 +135,10 @@ public class Stamp {
     return deepCopy(img);
   }
 
+  public Point size() {
+    return new Point(img.getWidth(), img.getHeight());
+  }
+
   private static BufferedImage deepCopy(BufferedImage bi) {
     ColorModel cm = bi.getColorModel();
     boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
