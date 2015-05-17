@@ -104,13 +104,15 @@ public final class PaintingController {
     boolean showSpine = prefs.isSpineMode();
     int projections = 0;
 
-    if (!showSpine) {
-      projections = (x * y / prefs.getStampCountDemultiplier());
-      log.info("Number of projections: " + projections);
-    }
-
     ProgressCounter counter = new ProgressCounter(listener, projections);
     stamps = createStamps(counter);
+
+    if (!showSpine) {
+      projections = (x * y / prefs.getStampCountDemultiplier());
+      projections = adaptProjectionsToStampsSizes(projections, stamps);
+      counter.setProjections(projections);
+      log.info("Number of projections: " + projections);
+    }
 
     if (pallette == null || !retainColors) {
       pallette = new Pallette(generateColorModels(new Random()));
@@ -168,6 +170,22 @@ public final class PaintingController {
       backup.revert();
       return null;
     }
+  }
+
+  private int adaptProjectionsToStampsSizes(int projections, StampProvider stamps) {
+    int defaultSize = 150;
+    int defArea = defaultSize * defaultSize;
+    double projectionsTemp = projections;
+    double affection = ((double)1 / (double)stamps.size()) * projections;
+    for (Stamp stamp : stamps.getStamps()) {
+      Point size = stamp.size();
+      int area = size.x * size.y;
+      double multiplier = (double)defArea / (double)area;
+      double a = (multiplier - 1) * affection * stamp.getMetadata().getRarity();
+      projectionsTemp += a;
+    }
+    // Just in case limit the number of projections to 3 times the original count.
+    return (int) Math.min(projectionsTemp, projections * 3);
   }
 
   private StampProvider createStamps(ProgressCounter counter) {

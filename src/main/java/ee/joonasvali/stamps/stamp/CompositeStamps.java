@@ -29,5 +29,10 @@ public class CompositeStamps implements StampProvider {
   public List<Stamp> getStamps() {
     return list;
   }
+
+  @Override
+  public int size() {
+    return list.size();
+  }
 }
 
