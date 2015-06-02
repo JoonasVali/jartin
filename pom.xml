@@ -6,7 +6,7 @@
 
   <groupId>stamps</groupId>
   <artifactId>stamps</artifactId>
-  <version>1.0.alpha5-SNAPSHOT</version>
+  <version>1.0.alpha5</version>
 
 
   <properties>
