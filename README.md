@@ -6,15 +6,15 @@ Jartin is trivial to use and does not require any initial configuration to get s
 ## Examples
 
 Some nice examples of Jartin generated images:
-http://i.imgur.com/gcwQrcm.jpg
-http://i.imgur.com/Tb0oHxR.jpg
-http://i.imgur.com/yvXT2or.jpg
+* http://i.imgur.com/gcwQrcm.jpg
+* http://i.imgur.com/Tb0oHxR.jpg
+* http://i.imgur.com/yvXT2or.jpg
 
 ## Getting Started
 
 You can build the app by Maven: 
 ```
-"mvn package"
+mvn package
 ```
 
 target/stamps/stamps should then contain the fully compiled app. 

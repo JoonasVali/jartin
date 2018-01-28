@@ -37,7 +37,7 @@ public class Metadata {
 
   public Metadata() {
     Properties properties = new Properties();
-    try (InputStream inputStream = ClassLoader.class.getResourceAsStream(META_PROPERTIES)) {
+    try (InputStream inputStream = Metadata.class.getResourceAsStream(META_PROPERTIES)) {
       properties.load(inputStream);
     } catch (IOException e) {
       log.error(e.getMessage(), e);
