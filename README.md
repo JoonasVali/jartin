@@ -6,19 +6,36 @@ Jartin is trivial to use and does not require any initial configuration to get s
 ## Examples
 
 Some nice examples of Jartin generated images:
-* http://i.imgur.com/gcwQrcm.jpg
-* http://i.imgur.com/Tb0oHxR.jpg
-* http://i.imgur.com/yvXT2or.jpg
+![Example 1](http://i.imgur.com/gcwQrcm.jpg)
+![Example 2](http://i.imgur.com/Tb0oHxR.jpg)
+![Example 3](http://i.imgur.com/yvXT2or.jpg)
 
 ## Getting Started
 
-You can build the app by Maven: 
+You can build the app by Maven.
+
+### Build for Windows based systems
 ```
-mvn package
+mvn package -Pwin
 ```
 
-target/stamps/stamps should then contain the fully compiled app. 
-(Currently win executors only, you need to convert them to linux or OSX if needed, or just launch the jartin.jar file yourself.)
+As a result
+```
+{project.dir}/target/jartin/jartin
+```
+should then contain the fully compiled app.
 
-If jartin stamps contain any of your brushes and you are not happy that they are being used, then please let me know.
+### Build for Unix based systems
+```
+mvn package -Punix
+```
+
+As a result
+```
+{project.dir}/target/jartin/jartin
+```
+should then contain the fully compiled app.
+
+If Jartin stamps contain any of your brushes/stencils and you are not happy that they are being used,
+then please let me know and I'll remove them.
 

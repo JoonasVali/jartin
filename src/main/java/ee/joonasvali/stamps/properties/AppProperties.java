@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
@@ -32,7 +33,6 @@ public class AppProperties {
     loadString("jartin.output", this::setOutput);
     loadBoolean("jartin.stamps.lazyloading", this::setLazyLoading);
 
-
     if (outputPath == null) {
       outputPath = System.getProperty("user.home") + File.separator + "jartin" + File.separator + "out";
     }
@@ -47,11 +47,16 @@ public class AppProperties {
       file.mkdirs();
     }
 
-
-    if (stampsDirPath != null) {
-      stampsDir = new File(stampsDirPath);
-    } else {
-      stampsDir = new File(Util.getUserDir(), "stamps");
+    try {
+      if (stampsDirPath != null) {
+        stampsDir = new File(stampsDirPath).getCanonicalFile();
+      } else {
+        stampsDir = new File(Util.getUserDir(), "stamps").getCanonicalFile();
+      }
+    } catch (IOException ex) {
+      logger.error("Unable to convert stamps directory to canonical path.", ex);
+      logger.error("stampsDirPath = " + stampsDirPath);
+      logger.error("user dir / stamps = " +  new File(Util.getUserDir(), "stamps"));
     }
 
     if (!stampsDir.exists()) {

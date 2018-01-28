@@ -18,15 +18,29 @@
   </dependencySets>
   <fileSets>
     <!--
-    Adds startup scripts to the root directory of zip package. The startup
-    scripts are from the src/main/scripts directory.
+    Adds startup scripts to the root directory.
     -->
     <fileSet>
-      <directory>${binfolder}</directory>
+      <directory>${binfolder}/unix</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
         <include>**/*</include>
       </includes>
+      <lineEnding>unix</lineEnding>
+      <fileMode>0755</fileMode>
+    </fileSet>
+
+    <!--
+    Adds common files to root directory
+    -->
+    <fileSet>
+      <directory>${binfolder}/common</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>**/*</include>
+      </includes>
+      <lineEnding>unix</lineEnding>
+      <fileMode>0755</fileMode>
     </fileSet>
 
     <!-- Copy all stamps over -->
@@ -36,7 +50,8 @@
       <includes>
         <include>**/*</include>
       </includes>
-
+      <lineEnding>unix</lineEnding>
+      <!--<fileMode>0755</fileMode>-->
     </fileSet>
     <!--
     Adds the jar file of our example application to the root directory

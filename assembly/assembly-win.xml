@@ -1,0 +1,65 @@
+<assembly>
+  <id>bin</id>
+  <!-- Specifies that our binary distribution is a dir -->
+  <formats>
+    <format>dir</format>
+  </formats>
+  <!-- Adds the dependencies of our application to the lib directory -->
+  <dependencySets>
+    <dependencySet>
+      <!--
+      Project artifact is not copied under library directory since
+      it is added to the root directory of the zip package.
+      -->
+      <useProjectArtifact>false</useProjectArtifact>
+      <outputDirectory>lib</outputDirectory>
+      <unpack>false</unpack>
+    </dependencySet>
+  </dependencySets>
+  <fileSets>
+    <!--
+    Adds startup scripts to the root directory.
+    -->
+    <fileSet>
+      <directory>${binfolder}/win</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>**/*</include>
+      </includes>
+      <lineEnding>windows</lineEnding>
+    </fileSet>
+
+    <!--
+    Adds common files to root directory
+    -->
+    <fileSet>
+      <directory>${binfolder}/common</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>**/*</include>
+      </includes>
+      <lineEnding>windows</lineEnding>
+    </fileSet>
+
+    <!-- Copy all stamps over -->
+    <fileSet>
+      <directory>${stampfolder}</directory>
+      <outputDirectory>stamps</outputDirectory>
+      <includes>
+        <include>**/*</include>
+      </includes>
+      <!--<lineEnding>windows</lineEnding>-->
+    </fileSet>
+    <!--
+    Adds the jar file of our example application to the root directory
+    of the created zip package.
+    -->
+    <fileSet>
+      <directory>${project.build.directory}</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>jartin.jar</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>

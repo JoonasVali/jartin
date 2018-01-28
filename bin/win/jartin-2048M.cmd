@@ -1,0 +1,1 @@
+java -jar -Djartin.stamps=./stamps -Djartin.output=./out -Xmx2048M jartin.jar 

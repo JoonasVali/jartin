@@ -18,6 +18,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -162,11 +163,13 @@ public class Stamp {
     }
 
     private void load() throws IllegalArgumentException{
-      try {
-        img = ImageUtil.trim(ImageIO.read(file), Color.WHITE);
+      try (FileInputStream stream = new FileInputStream(file)) {
+        img = ImageUtil.trim(ImageIO.read(stream), Color.WHITE);
       } catch (IOException e) {
         log.error("IOException for image " + file, e);
         System.exit(-1);
+      } catch (Exception e) {
+        log.error("Exception for image " + file, e);
       }
     }
   }

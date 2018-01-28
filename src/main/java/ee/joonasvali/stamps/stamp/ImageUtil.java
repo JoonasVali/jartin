@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
  * @author Joonas Vali
  */
 public class ImageUtil {
-  public static BufferedImage trim(BufferedImage image, Color croppedColor) throws IllegalArgumentException{
+  public static BufferedImage trim(BufferedImage image, Color croppedColor) throws IllegalArgumentException {
     int startX = -1, startY = -1, endX = -1, endY = -1;
     int color = croppedColor.getRGB();
     for (int x = 0; x < image.getWidth(); x++) {

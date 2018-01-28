@@ -14,8 +14,9 @@
     <author>Joonas Vali</author>
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-    <binfolder>${basedir}/src/main/bin</binfolder>
+    <binfolder>${basedir}/bin</binfolder>
     <stampfolder>${basedir}/stamps</stampfolder>
+    <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
   </properties>
 
   <dependencies>
@@ -36,6 +37,27 @@
     </dependency>
 
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>win</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <os.version.string>Windows</os.version.string>
+        <asm.file>${basedir}/assembly/assembly-win.xml</asm.file>
+      </properties>
+    </profile>
+    <profile>
+      <id>unix</id>
+      <properties>
+        <os.version.string>Mac and Linux</os.version.string>
+        <asm.file>${basedir}/assembly/assembly-unix.xml</asm.file>
+      </properties>
+    </profile>
+  </profiles>
+
   <build>
     <resources>
       <resource>
@@ -78,13 +100,13 @@
 
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-
+        <version>${maven.assembly.plugin.version}</version>
         <configuration>
           <descriptors>
-            <descriptor>src/main/assembly/assembly.xml</descriptor>
+            <descriptor>${asm.file}</descriptor>
           </descriptors>
 
-          <finalName>stamps</finalName>
+          <finalName>jartin</finalName>
           <appendAssemblyId>false</appendAssemblyId>
         </configuration>
 
@@ -101,7 +123,6 @@
     </plugins>
 
   </build>
-
 
 
 </project>
