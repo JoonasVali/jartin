@@ -34,6 +34,6 @@ public class BinaryQuery<T> {
       size = list.size() - posSize;
       startPos = posSize;
     }
-    return query.get(new DelegatorList<>(list, startPos, startPos + size));
+    return query.get(list.subList( startPos, startPos + size));
   }
 }
