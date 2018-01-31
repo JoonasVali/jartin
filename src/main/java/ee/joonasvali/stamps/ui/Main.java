@@ -69,9 +69,9 @@ public class Main {
     JCheckBox box2 = new JCheckBox("Reuse brushes", false);
     JCheckBox box3 = new JCheckBox("Reuse spine", false);
 
-    box1.addActionListener(getBocActionListener(box1, ui::setRetainColors));
-    box2.addActionListener(getBocActionListener(box2, ui::setRetainStamps));
-    box3.addActionListener(getBocActionListener(box3, ui::setRetainSpine));
+    box1.addActionListener(getBoxActionListener(box1, ui::setRetainColors));
+    box2.addActionListener(getBoxActionListener(box2, ui::setRetainStamps));
+    box3.addActionListener(getBoxActionListener(box3, ui::setRetainSpine));
 
     settings.addActionListener(s -> openSettings());
 
@@ -149,7 +149,7 @@ public class Main {
     return s -> ui.setRetainColors(box1.isSelected());
   }
 
-  private ActionListener getBocActionListener(JCheckBox box, Consumer<Boolean> method) {
+  private ActionListener getBoxActionListener(JCheckBox box, Consumer<Boolean> method) {
     return s -> method.accept(box.isSelected());
   }
 

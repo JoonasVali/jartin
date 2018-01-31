@@ -43,9 +43,12 @@ import java.util.concurrent.Future;
  * @author Joonas Vali
  */
 public final class PaintingController {
+  private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
   private static Logger log = LoggerFactory.getLogger(PaintingController.class);
   private static final double CHANCE_OF_GRADIENT_COLOR = 0.7;
-  private static ExecutorService multiThreadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+  private static ExecutorService multiThreadExecutor = Executors.newFixedThreadPool(AVAILABLE_PROCESSORS);
+
+  private static RandomQuery<ColorModel> backgroundColorModelChooser = RandomQuery.create();
 
   private final Preferences prefs = new Preferences();
   private final BinaryFormulaGenerator colorFormulaGenerator;
@@ -58,6 +61,7 @@ public final class PaintingController {
 
   private final StampLoader stampPool = new StampLoader(AppProperties.getInstance().getStampsDir());
 
+  private volatile ColorModel backgroundColorModel;
   private volatile Pallette pallette;
   private volatile StampProvider stamps;
 
@@ -116,12 +120,13 @@ public final class PaintingController {
 
     if (pallette == null || !retainColors) {
       pallette = new Pallette(generateColorModels(new Random()));
+      backgroundColorModel = pallette.getColor(backgroundColorModelChooser);
     } else {
       log.debug("Skip generating color models");
     }
 
     ProjectionGenerator gen = new ProjectionGenerator(x, y, stamps, pallette, new Random());
-    Painting painting = new Painting(x, y, pallette, projections);
+    Painting painting = new Painting(x, y, backgroundColorModel, projections);
 
 
     if (stampQuery == null || colorModelQuery == null || colorQuery == null || !retainSpine) {
@@ -137,7 +142,7 @@ public final class PaintingController {
         log.info("Start painting.");
         painting.startPainting(counter);
         try {
-          addProjections(gen, painting, projections, Runtime.getRuntime().availableProcessors());
+          addProjections(gen, painting, projections, AVAILABLE_PROCESSORS);
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
         }

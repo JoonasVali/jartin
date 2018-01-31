@@ -27,16 +27,15 @@ public class Painting {
   public static final Logger log = LoggerFactory.getLogger(Painting.class);
   private static final Projection POISON_PILL = canvas -> { /* Nothing to do */ };
 
-  private static RandomQuery<ColorModel> colorModelChooser = RandomQuery.create();
   private static RandomQuery<Color> colorChooser = RandomQuery.create();
 
-  private ExecutorService executor = Executors.newSingleThreadExecutor();
+  private final ExecutorService executor = Executors.newSingleThreadExecutor();
   private final ArrayBlockingQueue<Projection> projections;
   private volatile BufferedImage canvas;
   private final int width, height;
-  private final Pallette pallette;
   private volatile boolean startPainting;
-  private SynchronousQueue<BufferedImage> canvasSync;
+  private final SynchronousQueue<BufferedImage> canvasSync;
+  private final ColorModel backgroundColorModel;
 
   private volatile ProgressCounter counter;
 
@@ -68,14 +67,14 @@ public class Painting {
   }
 
 
-  public Painting(int width, int height, Pallette pallette, int projections) {
+  public Painting(int width, int height, ColorModel backgroundColorModel, int projections) {
     this.width = width;
     this.height = height;
-    this.pallette = pallette;
     this.projections = new ArrayBlockingQueue<>(projections + 1);
     this.canvasSync = new SynchronousQueue<>();
-
+    this.backgroundColorModel = backgroundColorModel;
   }
+
 
   public void addProjection(Projection projection) {
     try {
@@ -87,7 +86,8 @@ public class Painting {
 
   private void paintBackground() {
     canvas = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
-    ColorModel colorModel = pallette.getColor(colorModelChooser);
+    ColorModel colorModel = backgroundColorModel;
+
     if (colorModel instanceof PositionAwareColorModel) {
       PositionAwareColorModel bgModel = (PositionAwareColorModel) colorModel;
       PositionAwareColor bgColor = bgModel.getColor();
@@ -98,13 +98,10 @@ public class Painting {
         }
       }
     } else {
-      Color backgroundColor = colorModel.getColor(colorChooser);
-
-      for (int i = 0; i < this.width; i++) {
-        for (int j = 0; j < this.height; j++) {
-          canvas.setRGB(i, j, backgroundColor.getRGB());
-        }
-      }
+      Graphics2D g = canvas.createGraphics();
+      Color color = colorModel.getColor(colorChooser);
+      g.setColor(color);
+      g.fill(new Rectangle(0, 0, width, height));
     }
   }
 
@@ -123,28 +120,24 @@ public class Painting {
   }
 
   public Runnable getAction() {
-    return new Runnable() {
-      @Override
-      public void run() {
-
-        paintBackground();
-        while (startPainting || projections.size() > 0) {
-          try {
-            Projection projection = projections.take();
-            if (projection == POISON_PILL) break;
-            projection.paintTo(canvas);
-            counter.increase();
-          } catch (InterruptedException e) {
-            // Nothing to do
-          }
-        }
-
-        counter.clear();
+    return () -> {
+      paintBackground();
+      while (startPainting || projections.size() > 0) {
         try {
-          canvasSync.put(canvas);
+          Projection projection = projections.take();
+          if (projection == POISON_PILL) break;
+          projection.paintTo(canvas);
+          counter.increase();
         } catch (InterruptedException e) {
-          System.exit(-1);
+          // Nothing to do
         }
+      }
+
+      counter.clear();
+      try {
+        canvasSync.put(canvas);
+      } catch (InterruptedException e) {
+        System.exit(-1);
       }
     };
   }
