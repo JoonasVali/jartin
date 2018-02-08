@@ -36,7 +36,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -45,11 +44,11 @@ import java.util.concurrent.Future;
  * @author Joonas Vali
  */
 public final class PaintingControllerImpl implements PaintingController {
-  private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
+
   private static Logger log = LoggerFactory.getLogger(PaintingControllerImpl.class);
   private static final double CHANCE_OF_GRADIENT_COLOR = 0.7;
-  private static ExecutorService multiThreadExecutor = Executors.newFixedThreadPool(AVAILABLE_PROCESSORS);
 
+  private static ExecutorService painter = Executors.newSingleThreadExecutor();
   private static RandomQuery<ColorModel> backgroundColorModelChooser = RandomQuery.create();
 
   private final Preferences prefs = new Preferences();
@@ -71,10 +70,13 @@ public final class PaintingControllerImpl implements PaintingController {
   private volatile Query<ColorModel> colorModelQuery;
   private volatile Query<Color> colorQuery;
 
+  private final ProjectionRenderer projectionRenderer;
+
   public PaintingControllerImpl(BinaryFormulaGenerator colorModelFormulaGenerator, BinaryFormulaGenerator stampFormulaGenerator, BinaryFormulaGenerator colorFormulaGenerator) {
     this.colorModelFormulaGenerator = colorModelFormulaGenerator;
     this.stampFormulaGenerator = stampFormulaGenerator;
     this.colorFormulaGenerator = colorFormulaGenerator;
+    this.projectionRenderer = new ProjectionRenderer();
     stampPool.loadStampsConcurrently();
   }
 
@@ -147,25 +149,22 @@ public final class PaintingControllerImpl implements PaintingController {
       try {
         log.info("Start painting.");
         Runnable paintingAction = painting.startPainting(counter);
-        paintingProcess = multiThreadExecutor.submit(paintingAction);
-        try {
-          addProjections(gen, painting, projections, AVAILABLE_PROCESSORS);
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-        }
+        paintingProcess = painter.submit(paintingAction);
+        projectionRenderer.render(painting, () -> painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery)), projections);
+        log.info("Is interrupted? " + Thread.currentThread().isInterrupted());
       }
       finally {
         try {
+          log.info("Is interrupted 2? " + Thread.currentThread().isInterrupted());
           painting.stopPainting();
           log.info("Stop painting.");
         } catch (InterruptedException e) {
-          log.info("Painting cancelled during stopping.");
+          log.info("Painting interrupted during stopping.");
           if (paintingProcess != null) {
             paintingProcess.cancel(true);
           }
           counter.clear();
           backup.revert();
-          return null;
         }
       }
 
@@ -181,9 +180,7 @@ public final class PaintingControllerImpl implements PaintingController {
       return painting.getImage();
     } catch (InterruptedException e) {
       log.info("No image available. Painting cancelled.");
-      if (paintingProcess != null) {
-        paintingProcess.cancel(true);
-      }
+      paintingProcess.cancel(true);
       counter.clear();
       // TODO
       backup.revert();
@@ -218,48 +215,6 @@ public final class PaintingControllerImpl implements PaintingController {
     } else {
       log.debug("Skip generating stamps");
       return stamps;
-    }
-  }
-
-  private void addProjections(ProjectionGenerator gen, Painting painting, int projections, int processors) throws InterruptedException{
-    if (processors <= 1) {
-      // SINGLETHREADED LOGIC
-      for (int i = 0; i < projections; i++) {
-        painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
-      }
-    } else {
-      // MULTITHREADED LOGIC
-      CountDownLatch latch = new CountDownLatch(projections);
-
-      Runnable runnable = () -> {
-        try {
-          painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery));
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-        } catch (Exception e) {
-          log.error("Projection adding failed", e);
-        } finally {
-          latch.countDown();
-        }
-      };
-
-      ArrayList<Future> futures = new ArrayList<>(projections);
-      for (int i = 0; i < projections; i++) {
-        futures.add(multiThreadExecutor.submit(runnable));
-      }
-
-      try {
-        latch.await();
-      } catch (InterruptedException e) {
-        for(Future future : futures) {
-          if(!future.isDone() && !future.isCancelled()) {
-            future.cancel(true);
-          }
-        }
-        painting.cancel();
-        futures.clear();
-        Thread.currentThread().interrupt();
-      }
     }
   }
 

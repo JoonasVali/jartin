@@ -23,7 +23,7 @@ import java.util.concurrent.SynchronousQueue;
  */
 public class Painting {
   public static final Logger log = LoggerFactory.getLogger(Painting.class);
-  private static final Projection POISON_PILL = canvas -> { /* Nothing to do */ };
+  private static final Projection PROJECTIONS_ADDED_POISON_PILL = canvas -> { /* Nothing to do */ };
   private static RandomQuery<Color> colorChooser = RandomQuery.create();
 
   private final ArrayBlockingQueue<Projection> projections;
@@ -46,16 +46,10 @@ public class Painting {
 
   public void stopPainting() throws InterruptedException {
     if (!isPainting) {
-      throw new InterruptedException("Painting already stopped");
+      return;
     }
     isPainting = false;
-
-    try {
-      projections.put(POISON_PILL);
-    } catch (InterruptedException e) {
-      log.error(e.getMessage(), e);
-      System.exit(-1);
-    }
+    projections.put(PROJECTIONS_ADDED_POISON_PILL);
   }
 
   public Painting(int width, int height, ColorModel backgroundColorModel, int projections) {
@@ -116,7 +110,7 @@ public class Painting {
       while (isPainting || projections.size() > 0) {
         try {
           Projection projection = projections.take();
-          if (projection == POISON_PILL) break;
+          if (projection == PROJECTIONS_ADDED_POISON_PILL) break;
           projection.paintTo(canvas);
           counter.increase();
         } catch (InterruptedException e) {
