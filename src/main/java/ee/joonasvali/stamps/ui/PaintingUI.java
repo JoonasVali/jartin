@@ -6,6 +6,7 @@ package ee.joonasvali.stamps.ui;
 
 import ee.joonasvali.stamps.code.Util;
 import ee.joonasvali.stamps.meta.Metadata;
+import ee.joonasvali.stamps.painting.PaintingController;
 import ee.joonasvali.stamps.properties.AppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,16 +128,15 @@ public class PaintingUI extends JPanel {
 
   private class Increaser {
     private int count;
-    private int increase;
+    private int step;
 
-    private Increaser(int initialCount, int increase) {
+    private Increaser(int initialCount, int step) {
       this.count = initialCount;
-      this.increase = increase;
+      this.step = step;
     }
 
     public int getNext() {
-      int val = count;
-      count += increase;
+      count += step;
       return count;
     }
   }

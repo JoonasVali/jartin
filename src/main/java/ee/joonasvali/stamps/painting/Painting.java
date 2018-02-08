@@ -2,10 +2,10 @@
  * Copyright (c) 2015, Jartin. All rights reserved. This application is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; This application is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details. Do not remove this header.
  */
 
-package ee.joonasvali.stamps;
+package ee.joonasvali.stamps.painting;
 
+import ee.joonasvali.stamps.Projection;
 import ee.joonasvali.stamps.color.ColorModel;
-import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.color.PositionAwareColor;
 import ee.joonasvali.stamps.color.PositionAwareColorModel;
 import ee.joonasvali.stamps.query.RandomQuery;
@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -26,35 +24,31 @@ import java.util.concurrent.SynchronousQueue;
 public class Painting {
   public static final Logger log = LoggerFactory.getLogger(Painting.class);
   private static final Projection POISON_PILL = canvas -> { /* Nothing to do */ };
-
   private static RandomQuery<Color> colorChooser = RandomQuery.create();
 
-  private final ExecutorService executor = Executors.newSingleThreadExecutor();
   private final ArrayBlockingQueue<Projection> projections;
   private volatile BufferedImage canvas;
   private final int width, height;
-  private volatile boolean startPainting;
+  private volatile boolean isPainting;
   private final SynchronousQueue<BufferedImage> canvasSync;
   private final ColorModel backgroundColorModel;
-
   private volatile ProgressCounter counter;
 
-
-  public void startPainting(ProgressCounter counter) {
+  public Runnable startPainting(ProgressCounter counter) {
     this.counter = counter;
-    if (startPainting) {
+    if (isPainting) {
       log.error("Illegal state in Painting, can't call startPainting");
       System.exit(-1);
     }
-    startPainting = true;
-    executor.execute(getAction());
+    isPainting = true;
+    return getAction();
   }
 
   public void stopPainting() throws InterruptedException {
-    if (!startPainting) {
+    if (!isPainting) {
       throw new InterruptedException("Painting already stopped");
     }
-    startPainting = false;
+    isPainting = false;
 
     try {
       projections.put(POISON_PILL);
@@ -62,10 +56,7 @@ public class Painting {
       log.error(e.getMessage(), e);
       System.exit(-1);
     }
-
-    executor.shutdown();
   }
-
 
   public Painting(int width, int height, ColorModel backgroundColorModel, int projections) {
     this.width = width;
@@ -122,22 +113,23 @@ public class Painting {
   public Runnable getAction() {
     return () -> {
       paintBackground();
-      while (startPainting || projections.size() > 0) {
+      while (isPainting || projections.size() > 0) {
         try {
           Projection projection = projections.take();
           if (projection == POISON_PILL) break;
           projection.paintTo(canvas);
           counter.increase();
         } catch (InterruptedException e) {
-          // Nothing to do
+          counter.clear();
+          return;
         }
       }
 
       counter.clear();
       try {
         canvasSync.put(canvas);
-      } catch (InterruptedException e) {
-        System.exit(-1);
+      } catch (InterruptedException ignore) {
+        return;
       }
     };
   }

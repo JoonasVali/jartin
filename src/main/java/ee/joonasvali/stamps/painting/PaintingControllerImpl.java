@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Jartin. All rights reserved. This application is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; This application is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details. Do not remove this header.
  */
 
-package ee.joonasvali.stamps.ui;
+package ee.joonasvali.stamps.painting;
 
-import ee.joonasvali.stamps.Painting;
 import ee.joonasvali.stamps.ProjectionGenerator;
 import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.ColorUtil;
@@ -21,12 +20,15 @@ import ee.joonasvali.stamps.query.RandomQuery;
 import ee.joonasvali.stamps.query.ReversingCompoundBinaryFormula;
 import ee.joonasvali.stamps.query.XYFormulaQuery;
 import ee.joonasvali.stamps.stamp.CompositeStamps;
-import ee.joonasvali.stamps.stamp.StampLoader;
 import ee.joonasvali.stamps.stamp.RandomIntersectionComposerStrategy;
 import ee.joonasvali.stamps.stamp.RandomMergeComposerStrategy;
 import ee.joonasvali.stamps.stamp.Stamp;
+import ee.joonasvali.stamps.stamp.StampLoader;
 import ee.joonasvali.stamps.stamp.StampProvider;
 import ee.joonasvali.stamps.stamp.Stamps;
+import ee.joonasvali.stamps.ui.Preferences;
+import ee.joonasvali.stamps.ui.ProgressCounter;
+import ee.joonasvali.stamps.ui.ProgressListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,9 +44,9 @@ import java.util.concurrent.Future;
 /**
  * @author Joonas Vali
  */
-public final class PaintingController {
+public final class PaintingControllerImpl implements PaintingController {
   private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
-  private static Logger log = LoggerFactory.getLogger(PaintingController.class);
+  private static Logger log = LoggerFactory.getLogger(PaintingControllerImpl.class);
   private static final double CHANCE_OF_GRADIENT_COLOR = 0.7;
   private static ExecutorService multiThreadExecutor = Executors.newFixedThreadPool(AVAILABLE_PROCESSORS);
 
@@ -69,25 +71,29 @@ public final class PaintingController {
   private volatile Query<ColorModel> colorModelQuery;
   private volatile Query<Color> colorQuery;
 
-  public PaintingController(BinaryFormulaGenerator colorModelFormulaGenerator, BinaryFormulaGenerator stampFormulaGenerator, BinaryFormulaGenerator colorFormulaGenerator) {
+  public PaintingControllerImpl(BinaryFormulaGenerator colorModelFormulaGenerator, BinaryFormulaGenerator stampFormulaGenerator, BinaryFormulaGenerator colorFormulaGenerator) {
     this.colorModelFormulaGenerator = colorModelFormulaGenerator;
     this.stampFormulaGenerator = stampFormulaGenerator;
     this.colorFormulaGenerator = colorFormulaGenerator;
     stampPool.loadStampsConcurrently();
   }
 
+  @Override
   public void setRetainColors(boolean retainColors) {
     this.retainColors = retainColors;
   }
 
+  @Override
   public void setRetainStamps(boolean retainStamps) {
     this.retainStamps = retainStamps;
   }
 
+  @Override
   public void setRetainSpine(boolean retainSpine) {
     this.retainSpine = retainSpine;
   }
 
+  @Override
   public void clearCaches() {
     log.info("Clearing Caches");
     Stamp.clearCache();
@@ -97,6 +103,7 @@ public final class PaintingController {
   /**
    * @return Image or null if cancelled
    */
+  @Override
   public synchronized BufferedImage generateImage(ProgressListener listener) {
     Backup backup = new Backup(pallette, stamps, stampQuery, colorModelQuery, colorQuery);
 
@@ -135,12 +142,12 @@ public final class PaintingController {
       colorQuery = generateXYFormulaQuery(colorFormulaGenerator);
     }
 
-
-
+    Future<?> paintingProcess = null;
     if (!showSpine) {
       try {
         log.info("Start painting.");
-        painting.startPainting(counter);
+        Runnable paintingAction = painting.startPainting(counter);
+        paintingProcess = multiThreadExecutor.submit(paintingAction);
         try {
           addProjections(gen, painting, projections, AVAILABLE_PROCESSORS);
         } catch (InterruptedException e) {
@@ -152,7 +159,10 @@ public final class PaintingController {
           painting.stopPainting();
           log.info("Stop painting.");
         } catch (InterruptedException e) {
-          log.info("Painting cancelled.");
+          log.info("Painting cancelled during stopping.");
+          if (paintingProcess != null) {
+            paintingProcess.cancel(true);
+          }
           counter.clear();
           backup.revert();
           return null;
@@ -170,8 +180,12 @@ public final class PaintingController {
     try {
       return painting.getImage();
     } catch (InterruptedException e) {
-      log.info("Painting cancelled.");
+      log.info("No image available. Painting cancelled.");
+      if (paintingProcess != null) {
+        paintingProcess.cancel(true);
+      }
       counter.clear();
+      // TODO
       backup.revert();
       return null;
     }
@@ -243,6 +257,7 @@ public final class PaintingController {
           }
         }
         painting.cancel();
+        futures.clear();
         Thread.currentThread().interrupt();
       }
     }
@@ -269,6 +284,7 @@ public final class PaintingController {
     return colorModels;
   }
 
+  @Override
   public Preferences getPrefs() {
     return prefs;
   }
@@ -331,11 +347,11 @@ public final class PaintingController {
 
     public void revert() {
       log.info("Reverting data from backup");
-      PaintingController.this.colorQuery = colorQuery;
-      PaintingController.this.stamps = stamps;
-      PaintingController.this.pallette = pallette;
-      PaintingController.this.colorModelQuery = colorModelQuery;
-      PaintingController.this.stampQuery = stampQuery;
+      PaintingControllerImpl.this.colorQuery = colorQuery;
+      PaintingControllerImpl.this.stamps = stamps;
+      PaintingControllerImpl.this.pallette = pallette;
+      PaintingControllerImpl.this.colorModelQuery = colorModelQuery;
+      PaintingControllerImpl.this.stampQuery = stampQuery;
     }
   }
 }

@@ -3,7 +3,6 @@ package ee.joonasvali.stamps.tests;
 import ee.joonasvali.stamps.query.BinaryQuery;
 import ee.joonasvali.stamps.query.BinaryValue;
 import ee.joonasvali.stamps.query.Query;
-
 import org.junit.Assert;
 import org.junit.Test;
 

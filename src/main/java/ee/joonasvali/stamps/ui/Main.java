@@ -6,6 +6,7 @@ package ee.joonasvali.stamps.ui;
 
 import ee.joonasvali.stamps.code.Util;
 import ee.joonasvali.stamps.meta.Metadata;
+import ee.joonasvali.stamps.painting.PaintingControllerImpl;
 import ee.joonasvali.stamps.properties.AppProperties;
 import ee.joonasvali.stamps.query.DefaultBinaryFormulaGenerator;
 import org.slf4j.Logger;
@@ -29,13 +30,7 @@ public class Main {
   private volatile AppProperties properties = AppProperties.getInstance();
 
   public static void main(String[] args) throws InvocationTargetException, InterruptedException {
-    SwingUtilities.invokeAndWait(new Runnable() {
-      @Override
-      public void run() {
-        new Main().run();
-      }
-    });
-
+    SwingUtilities.invokeAndWait(() -> new Main().run());
   }
 
   private void run() {
@@ -50,7 +45,7 @@ public class Main {
     progressBar.setStringPainted(true);
     ProgressBarUpdateUtility progressUtility = new ProgressBarUpdateUtility(progressBar);
 
-    ui = new PaintingUI(new PaintingController(new DefaultBinaryFormulaGenerator(), new DefaultBinaryFormulaGenerator(), new DefaultBinaryFormulaGenerator()), progressUtility);
+    ui = new PaintingUI(new PaintingControllerImpl(new DefaultBinaryFormulaGenerator(), new DefaultBinaryFormulaGenerator(), new DefaultBinaryFormulaGenerator()), progressUtility);
     JScrollPane scrollPane = new JScrollPane(ui, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     HandScrollListener scrollListener = new HandScrollListener(ui);
     scrollPane.getViewport().addMouseMotionListener(scrollListener);
@@ -74,8 +69,6 @@ public class Main {
     box3.addActionListener(getBoxActionListener(box3, ui::setRetainSpine));
 
     settings.addActionListener(s -> openSettings());
-
-
 
     controlPanel.add(box1);
     controlPanel.add(new JSeparator(JSeparator.VERTICAL));

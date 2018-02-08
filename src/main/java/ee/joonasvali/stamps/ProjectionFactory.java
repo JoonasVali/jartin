@@ -8,7 +8,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public interface ProjectionFactory {
-  public BufferedImage getRawProjection(BufferedImage image, Color color, int x, int y);
-  public BufferedImage getRawProjection(BufferedImage image, Color color);
-  public Projection getProjectionFromRaw(BufferedImage image);
+  BufferedImage getRawProjection(BufferedImage image, Color color, int x, int y);
+  BufferedImage getRawProjection(BufferedImage image, Color color);
+  Projection getProjectionFromRaw(BufferedImage image);
 }
