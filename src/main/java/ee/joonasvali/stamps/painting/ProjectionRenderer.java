@@ -12,7 +12,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 
 public class ProjectionRenderer {
   private static Logger log = LoggerFactory.getLogger(ProjectionRenderer.class);
@@ -29,7 +28,7 @@ public class ProjectionRenderer {
     this.processors = threads;
   }
 
-  public List<Projection> render(Supplier<Projection> projectionSupplier, int projections, ProgressCounter counter) throws InterruptedException {
+  public List<Projection> render(InterruptibleSupplier<Projection> projectionSupplier, int projections, ProgressCounter counter) throws InterruptedException {
     List<Projection> projectionList = Collections.synchronizedList(new ArrayList<>());
     if (processors <= 1) {
       // SINGLETHREADED LOGIC
@@ -48,6 +47,8 @@ public class ProjectionRenderer {
       Runnable internalRunnable = () -> {
         try {
           projectionList.add(projectionSupplier.get());
+        } catch (InterruptedException e) {
+          log.info("Projection interrupted.");
         } finally {
           counter.increase();
           latch.countDown();
@@ -69,7 +70,7 @@ public class ProjectionRenderer {
         }
         log.info("Rendering cancelled.");
         futures.clear();
-        Thread.currentThread().interrupt();
+        throw e;
       }
     }
 

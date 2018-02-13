@@ -16,48 +16,42 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.concurrent.SynchronousQueue;
 
 /**
  * @author Joonas Vali
  */
 public class Painting {
-  public static final Logger log = LoggerFactory.getLogger(Painting.class);
-  private static RandomQuery<Color> colorChooser = RandomQuery.create();
+  private static final Logger log = LoggerFactory.getLogger(Painting.class);
+  private static final RandomQuery<Color> colorChooser = RandomQuery.create();
 
-  private final List<Projection> projectionQueue;
-  private int projectionsRendered = 0;
-  private volatile BufferedImage canvas;
+  private final List<Projection> renderedProjections;
+  private final BufferedImage canvas;
   private final int width, height;
-  private final SynchronousQueue<BufferedImage> canvasSync;
   private final ColorModel backgroundColorModel;
 
-  public Painting(int width, int height, ColorModel backgroundColorModel, List<Projection> projectionQueue) {
+  public Painting(int width, int height, ColorModel backgroundColorModel, List<Projection> renderedProjections) {
     this.width = width;
     this.height = height;
-    this.projectionQueue = projectionQueue;
-    this.canvasSync = new SynchronousQueue<>();
+    this.renderedProjections = renderedProjections;
     this.backgroundColorModel = backgroundColorModel;
+    canvas = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
   }
 
   public BufferedImage paint(ProgressCounter counter) throws InterruptedException {
     paintBackground();
-    while (projectionsRendered < projectionQueue.size()) {
+    for (Projection projection : renderedProjections) {
       if (Thread.currentThread().isInterrupted()) {
         counter.clear();
         throw new InterruptedException();
       }
-      Projection projection = projectionQueue.get(projectionsRendered++);
       projection.paintTo(canvas);
       counter.increase();
     }
-
     counter.clear();
     return canvas;
   }
 
   private void paintBackground() {
-    canvas = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
     ColorModel colorModel = backgroundColorModel;
 
     if (colorModel instanceof PositionAwareColorModel) {
@@ -76,9 +70,4 @@ public class Painting {
       g.fill(new Rectangle(0, 0, width, height));
     }
   }
-
-  public BufferedImage getImage() throws InterruptedException {
-    return canvasSync.take();
-  }
-
 }
