@@ -4,6 +4,7 @@
 
 package ee.joonasvali.stamps.painting;
 
+import ee.joonasvali.stamps.Projection;
 import ee.joonasvali.stamps.ProjectionGenerator;
 import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.ColorUtil;
@@ -35,10 +36,9 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * @author Joonas Vali
@@ -47,8 +47,6 @@ public final class PaintingControllerImpl implements PaintingController {
 
   private static Logger log = LoggerFactory.getLogger(PaintingControllerImpl.class);
   private static final double CHANCE_OF_GRADIENT_COLOR = 0.7;
-
-  private static ExecutorService painter = Executors.newSingleThreadExecutor();
   private static RandomQuery<ColorModel> backgroundColorModelChooser = RandomQuery.create();
 
   private final Preferences prefs = new Preferences();
@@ -106,7 +104,7 @@ public final class PaintingControllerImpl implements PaintingController {
    * @return Image or null if cancelled
    */
   @Override
-  public synchronized BufferedImage generateImage(ProgressListener listener) {
+  public synchronized Optional<BufferedImage> generateImage(ProgressListener listener) {
     Backup backup = new Backup(pallette, stamps, stampQuery, colorModelQuery, colorQuery);
 
     long startTime = System.currentTimeMillis();
@@ -135,7 +133,6 @@ public final class PaintingControllerImpl implements PaintingController {
     }
 
     ProjectionGenerator gen = new ProjectionGenerator(x, y, stamps, pallette, new Random());
-    Painting painting = new Painting(x, y, backgroundColorModel, projections);
 
 
     if (stampQuery == null || colorModelQuery == null || colorQuery == null || !retainSpine) {
@@ -144,47 +141,26 @@ public final class PaintingControllerImpl implements PaintingController {
       colorQuery = generateXYFormulaQuery(colorFormulaGenerator);
     }
 
-    Future<?> paintingProcess = null;
     if (!showSpine) {
       try {
         log.info("Start painting.");
-        Runnable paintingAction = painting.startPainting(counter);
-        paintingProcess = painter.submit(paintingAction);
-        projectionRenderer.render(painting, () -> painting.addProjection(gen.generate(stampQuery, colorModelQuery, colorQuery)), projections);
-        log.info("Is interrupted? " + Thread.currentThread().isInterrupted());
-      }
-      finally {
-        try {
-          log.info("Is interrupted 2? " + Thread.currentThread().isInterrupted());
-          painting.stopPainting();
-          log.info("Stop painting.");
-        } catch (InterruptedException e) {
-          log.info("Painting interrupted during stopping.");
-          if (paintingProcess != null) {
-            paintingProcess.cancel(true);
-          }
-          counter.clear();
-          backup.revert();
-        }
-      }
+        List<Projection> projectionList = projectionRenderer.render(() -> gen.generate(stampQuery, colorModelQuery, colorQuery), projections, counter);
+        Painting painting = new Painting(x, y, backgroundColorModel, projectionList);
 
+        BufferedImage result = painting.paint(counter);
+        long endTime = System.currentTimeMillis();
+        log.info("Generating new image completed. Total time: " + (endTime - startTime) + " ms");
+        return Optional.of(result);
+      }
+      catch (InterruptedException e) {
+        log.info("No image available. Painting cancelled.");
+        counter.clear();
+        backup.revert();
+        return Optional.empty();
+      }
     } else {
       log.warn("SPINE MODE!");
-      return paintLines(colorModelQuery);
-    }
-
-    long endTime = System.currentTimeMillis();
-    log.info("Generating new image completed. Total time: " + (endTime - startTime) + " ms");
-
-    try {
-      return painting.getImage();
-    } catch (InterruptedException e) {
-      log.info("No image available. Painting cancelled.");
-      paintingProcess.cancel(true);
-      counter.clear();
-      // TODO
-      backup.revert();
-      return null;
+      return Optional.of(paintLines(colorModelQuery));
     }
   }
 

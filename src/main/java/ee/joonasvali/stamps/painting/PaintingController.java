@@ -4,6 +4,7 @@ import ee.joonasvali.stamps.ui.Preferences;
 import ee.joonasvali.stamps.ui.ProgressListener;
 
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 public interface PaintingController {
   void setRetainColors(boolean retainColors);
@@ -14,7 +15,7 @@ public interface PaintingController {
 
   void clearCaches();
 
-  BufferedImage generateImage(ProgressListener listener);
+  Optional<BufferedImage> generateImage(ProgressListener listener);
 
   Preferences getPrefs();
 }

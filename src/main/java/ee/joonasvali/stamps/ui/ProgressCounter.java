@@ -12,19 +12,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ProgressCounter {
   private AtomicInteger count = new AtomicInteger();
   private ProgressListener listener;
-  private volatile int totalProjections;
+  private volatile int projectionsRenderedAndPainted;
 
   public ProgressCounter(ProgressListener listener, int totalProjections) {
     this.listener = listener;
-    this.totalProjections = totalProjections;
+    this.projectionsRenderedAndPainted = totalProjections * 2;
   }
 
   public void setProjections(int totalProjections) {
-    this.totalProjections = totalProjections;
+    this.projectionsRenderedAndPainted = totalProjections * 2;
   }
 
   public void increase() {
-    int val = (int)((double)count.incrementAndGet() / (double)totalProjections * 100);
+    int val = (int)((double)count.incrementAndGet() / (double) projectionsRenderedAndPainted * 100);
     listener.setValue(val);
   }
 

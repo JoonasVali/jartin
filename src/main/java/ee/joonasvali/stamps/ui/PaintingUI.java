@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -93,9 +94,9 @@ public class PaintingUI extends JPanel {
       if (!isEmptyImage) {
         controller.clearCaches();
       }
-      BufferedImage image =  controller.generateImage(progressListener);
-      if (image != null) {
-        lastImage = image;
+      Optional<BufferedImage> image = controller.generateImage(progressListener);
+      if (image.isPresent()) {
+        lastImage = image.get();
         isEmptyImage = false;
       }
       SwingUtilities.invokeLater(after);

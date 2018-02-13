@@ -97,7 +97,7 @@ public class Stamp {
   }
 
   @ThreadSafe
-  public Projection getProjection(Color color) throws InterruptedException {
+  public Projection getProjection(Color color) {
     lazyLoad();
     Future<BufferedImage> image = renders.get(color);
     if (image == null) {
@@ -112,9 +112,7 @@ public class Stamp {
 
     try {
       return factory.getProjectionFromRaw(image.get());
-    } catch (InterruptedException e) {
-      throw e;
-    } catch (ExecutionException e) {
+    } catch (ExecutionException | InterruptedException e) {
       log.error("Something went wrong", e.getCause());
       System.exit(-1);
       return null;

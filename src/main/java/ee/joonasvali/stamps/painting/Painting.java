@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.List;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -23,50 +23,37 @@ import java.util.concurrent.SynchronousQueue;
  */
 public class Painting {
   public static final Logger log = LoggerFactory.getLogger(Painting.class);
-  private static final Projection PROJECTIONS_ADDED_POISON_PILL = canvas -> { /* Nothing to do */ };
   private static RandomQuery<Color> colorChooser = RandomQuery.create();
 
-  private final ArrayBlockingQueue<Projection> projections;
+  private final List<Projection> projectionQueue;
+  private int projectionsRendered = 0;
   private volatile BufferedImage canvas;
   private final int width, height;
-  private volatile boolean isPainting;
   private final SynchronousQueue<BufferedImage> canvasSync;
   private final ColorModel backgroundColorModel;
-  private volatile ProgressCounter counter;
 
-  public Runnable startPainting(ProgressCounter counter) {
-    this.counter = counter;
-    if (isPainting) {
-      log.error("Illegal state in Painting, can't call startPainting");
-      System.exit(-1);
-    }
-    isPainting = true;
-    return getAction();
-  }
-
-  public void stopPainting() throws InterruptedException {
-    if (!isPainting) {
-      return;
-    }
-    isPainting = false;
-    projections.put(PROJECTIONS_ADDED_POISON_PILL);
-  }
-
-  public Painting(int width, int height, ColorModel backgroundColorModel, int projections) {
+  public Painting(int width, int height, ColorModel backgroundColorModel, List<Projection> projectionQueue) {
     this.width = width;
     this.height = height;
-    this.projections = new ArrayBlockingQueue<>(projections + 1);
+    this.projectionQueue = projectionQueue;
     this.canvasSync = new SynchronousQueue<>();
     this.backgroundColorModel = backgroundColorModel;
   }
 
-
-  public void addProjection(Projection projection) {
-    try {
-      projections.put(projection);
-    } catch (InterruptedException e) {
-      return;
+  public BufferedImage paint(ProgressCounter counter) throws InterruptedException {
+    paintBackground();
+    while (projectionsRendered < projectionQueue.size()) {
+      if (Thread.currentThread().isInterrupted()) {
+        counter.clear();
+        throw new InterruptedException();
+      }
+      Projection projection = projectionQueue.get(projectionsRendered++);
+      projection.paintTo(canvas);
+      counter.increase();
     }
+
+    counter.clear();
+    return canvas;
   }
 
   private void paintBackground() {
@@ -90,41 +77,8 @@ public class Painting {
     }
   }
 
-  public void cancel() {
-    projections.clear();
-    try {
-      stopPainting();
-    } catch (InterruptedException e) {
-      log.error("This shouldn't happen", e);
-      System.exit(-1);
-    }
-  }
-
   public BufferedImage getImage() throws InterruptedException {
     return canvasSync.take();
   }
 
-  public Runnable getAction() {
-    return () -> {
-      paintBackground();
-      while (isPainting || projections.size() > 0) {
-        try {
-          Projection projection = projections.take();
-          if (projection == PROJECTIONS_ADDED_POISON_PILL) break;
-          projection.paintTo(canvas);
-          counter.increase();
-        } catch (InterruptedException e) {
-          counter.clear();
-          return;
-        }
-      }
-
-      counter.clear();
-      try {
-        canvasSync.put(canvas);
-      } catch (InterruptedException ignore) {
-        return;
-      }
-    };
-  }
 }

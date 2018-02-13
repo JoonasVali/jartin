@@ -1,13 +1,18 @@
 package ee.joonasvali.stamps.painting;
 
+import ee.joonasvali.stamps.Projection;
+import ee.joonasvali.stamps.ui.ProgressCounter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 public class ProjectionRenderer {
   private static Logger log = LoggerFactory.getLogger(ProjectionRenderer.class);
@@ -24,17 +29,17 @@ public class ProjectionRenderer {
     this.processors = threads;
   }
 
-  public void render(Painting painting, InterruptibleRunnable renderFunction, int projections) {
+  public List<Projection> render(Supplier<Projection> projectionSupplier, int projections, ProgressCounter counter) throws InterruptedException {
+    List<Projection> projectionList = Collections.synchronizedList(new ArrayList<>());
     if (processors <= 1) {
       // SINGLETHREADED LOGIC
       for (int i = 0; i < projections; i++) {
-        try {
-          renderFunction.run();
-        } catch (InterruptedException e) {
+        if (Thread.currentThread().isInterrupted()) {
           log.info("Rendering cancelled.");
-          painting.cancel();
-          Thread.currentThread().interrupt();
+          throw new InterruptedException();
         }
+        projectionList.add(projectionSupplier.get());
+        counter.increase();
       }
     } else {
       // MULTITHREADED LOGIC
@@ -42,12 +47,9 @@ public class ProjectionRenderer {
 
       Runnable internalRunnable = () -> {
         try {
-          renderFunction.run();
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-        } catch (Exception e) {
-          log.error("Projection adding failed", e);
+          projectionList.add(projectionSupplier.get());
         } finally {
+          counter.increase();
           latch.countDown();
         }
       };
@@ -66,11 +68,12 @@ public class ProjectionRenderer {
           }
         }
         log.info("Rendering cancelled.");
-        painting.cancel();
         futures.clear();
         Thread.currentThread().interrupt();
       }
     }
+
+    return projectionList;
   }
 
 }
