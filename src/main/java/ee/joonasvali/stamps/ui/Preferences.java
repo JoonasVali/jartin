@@ -24,14 +24,14 @@ public class Preferences {
   public static final Logger log = LoggerFactory.getLogger(Preferences.class);
   private static final String PREF_FILE_NAME = "pref.properties";
   private static final String ID_NUMBER_OF_COLORS = "stamp.colorbase.count";
-  private static final String ID_STAMP_COUNT_DEMULTIPLIER = "stamp.count.demultiplier";
+  private static final String ID_STAMP_COUNT_MULTIPLIER = "stamp.count.multiplier";
   private static final String ID_STAMP_GROUPS_COUNT = "stamp.groups.count";
   private static final String ID_STAMPS_PER_GROUP = "stamp.groups.stamps_per_group";
 
   private static final int WIDTH = getMonitorWidth();
   private static final int HEIGHT = getMonitorHeight();
   private static final int NUMBER_OF_COLORS = 2;
-  private static final int STAMP_COUNT_DEMULTIPLIER = 4500;
+  private static final double STAMP_COUNT_MULTIPLIER = 0.45d;
   private static final int STAMP_GROUPS_COUNT = 6;
   private static final int STAMPS_PER_GROUP = 20;
   private static final boolean SPINE_MODE = false;
@@ -39,7 +39,7 @@ public class Preferences {
   private volatile int width = WIDTH;
   private volatile int height = HEIGHT;
   private volatile int numberOfColors = NUMBER_OF_COLORS;
-  private volatile int stampCountDemultiplier = STAMP_COUNT_DEMULTIPLIER;
+  private volatile double stampCountMultiplier = STAMP_COUNT_MULTIPLIER;
   private volatile int stampGroupsCount = STAMP_GROUPS_COUNT;
   private volatile int stampsPerGroup = STAMPS_PER_GROUP;
   private volatile boolean spineMode = SPINE_MODE;
@@ -78,12 +78,12 @@ public class Preferences {
     this.numberOfColors = numberOfColors;
   }
 
-  public int getStampCountDemultiplier() {
-    return stampCountDemultiplier;
+  public double getStampCountMultiplier() {
+    return stampCountMultiplier;
   }
 
-  public void setStampCountDemultiplier(int stampCountDemultiplier) {
-    this.stampCountDemultiplier = stampCountDemultiplier;
+  public void setStampCountMultiplier(double stampCountMultiplier) {
+    this.stampCountMultiplier = stampCountMultiplier;
   }
 
   public int getStampGroupsCount() {
@@ -134,7 +134,7 @@ public class Preferences {
 
     try {
       setNumberOfColors(Integer.parseInt(properties.getProperty(ID_NUMBER_OF_COLORS, Integer.toString(NUMBER_OF_COLORS))));
-      setStampCountDemultiplier(Integer.parseInt(properties.getProperty(ID_STAMP_COUNT_DEMULTIPLIER, Integer.toString(STAMP_COUNT_DEMULTIPLIER))));
+      setStampCountMultiplier(Integer.parseInt(properties.getProperty(ID_STAMP_COUNT_MULTIPLIER, Double.toString(STAMP_COUNT_MULTIPLIER))));
       setStampsPerGroup(Integer.parseInt(properties.getProperty(ID_STAMPS_PER_GROUP, Integer.toString(STAMPS_PER_GROUP))));
       setStampGroupsCount(Integer.parseInt(properties.getProperty(ID_STAMP_GROUPS_COUNT, Integer.toString(STAMP_GROUPS_COUNT))));
     } catch (Exception e) {
@@ -142,7 +142,7 @@ public class Preferences {
       setNumberOfColors(NUMBER_OF_COLORS);
       setStampGroupsCount(STAMP_GROUPS_COUNT);
       setStampsPerGroup(STAMPS_PER_GROUP);
-      setStampCountDemultiplier(STAMP_COUNT_DEMULTIPLIER);
+      setStampCountMultiplier(STAMP_COUNT_MULTIPLIER);
     }
   }
 }

@@ -6,16 +6,13 @@ package ee.joonasvali.stamps.ui;
 
 import java.util.function.Supplier;
 
-/**
- * @author Joonas Vali
- */
-public class IntegerValidator implements Validator{
-  private final int minValue;
-  private final int maxValue;
+public class NumericValidator implements Validator {
+  private final double minValue;
+  private final double maxValue;
   private final String name;
   private final Supplier<Integer> input;
 
-  public IntegerValidator(Supplier<Integer> getter, int minValue, int maxValue, String name) {
+  public NumericValidator(Supplier<Integer> getter, double minValue, double maxValue, String name) {
     this.minValue = minValue;
     this.maxValue = maxValue;
     this.name = name;

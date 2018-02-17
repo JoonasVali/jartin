@@ -45,6 +45,7 @@ import java.util.Random;
  */
 public final class PaintingControllerImpl implements PaintingController {
 
+  public static final double CONSTANT_STAMP_COUNT_DIVIDER = 0.001d;
   private static Logger log = LoggerFactory.getLogger(PaintingControllerImpl.class);
   private static final double CHANCE_OF_GRADIENT_COLOR = 0.7;
   private static RandomQuery<ColorModel> backgroundColorModelChooser = RandomQuery.create();
@@ -119,7 +120,7 @@ public final class PaintingControllerImpl implements PaintingController {
     stamps = createStamps(counter);
 
     if (!showSpine) {
-      projections = (x * y / prefs.getStampCountDemultiplier());
+      projections = ((int)(x * y * CONSTANT_STAMP_COUNT_DIVIDER * prefs.getStampCountMultiplier()));
       projections = adaptProjectionsToStampsSizes(projections, stamps);
       counter.setProjections(projections);
       log.info("Number of projections: " + projections);

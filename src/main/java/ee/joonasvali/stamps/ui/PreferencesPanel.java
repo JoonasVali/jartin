@@ -4,6 +4,9 @@
 
 package ee.joonasvali.stamps.ui;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -18,8 +21,9 @@ import java.util.function.Supplier;
  * @author Joonas Vali
  */
 public class PreferencesPanel extends JPanel {
-  public static final int MAX_STAMP_DEMULTIPLIER = 20000;
-  public static final int MIN_STAMP_DEMULTIPLIER = 100;
+  private static final Logger log = LoggerFactory.getLogger(PreferencesPanel.class);
+  public static final int MAX_STAMP_MULTIPLIER = 100;
+  public static final int MIN_STAMP_MULTIPLIER = 1;
   private final Preferences preferences;
   private final JButton save = new JButton("Save");
   private final ActionListener closeAction;
@@ -40,8 +44,8 @@ public class PreferencesPanel extends JPanel {
     create("Width", preferences::getWidth, preferences::setWidth, 100, Integer.MAX_VALUE);
     create("Height", preferences::getHeight, preferences::setHeight, 100, Integer.MAX_VALUE);
     create("Base colors", preferences::getNumberOfColors, preferences::setNumberOfColors, 2, 50);
-    createSlider("Stamp amount", preferences::getStampCountDemultiplier, preferences::setStampCountDemultiplier,
-        getDemultiplierDictionary(MIN_STAMP_DEMULTIPLIER, MAX_STAMP_DEMULTIPLIER), true,  MIN_STAMP_DEMULTIPLIER, MAX_STAMP_DEMULTIPLIER);
+    createSlider("Stamp amount", preferences::getStampCountMultiplier, preferences::setStampCountMultiplier,
+        getMultiplierDictionary(MIN_STAMP_MULTIPLIER, MAX_STAMP_MULTIPLIER), false, MIN_STAMP_MULTIPLIER, MAX_STAMP_MULTIPLIER);
     create("Stamp groups count", preferences::getStampGroupsCount, preferences::setStampGroupsCount, 1, 100);
     create("Stamps per group", preferences::getStampsPerGroup, preferences::setStampsPerGroup, 1, 100);
 
@@ -63,31 +67,40 @@ public class PreferencesPanel extends JPanel {
     this.add(savePanel);
   }
 
-  private void createSlider(String name, Supplier<Integer> supplier, Consumer<Integer> consumer, Dictionary dictionary, boolean inverted, int minValue, int maxValue) {
+  private void createSlider(String name, Supplier<Double> supplier, Consumer<Double> consumer, Dictionary dictionary, boolean inverted, int minValue, int maxValue) {
     JComponent component = createSliderObject(name, supplier, consumer, dictionary, inverted, minValue, maxValue);
     this.add(component);
   }
 
-  private JComponent createSliderObject(String name, Supplier<Integer> supplier, Consumer<Integer> consumer, Dictionary dictionary, boolean inverted, int minValue, int maxValue) {
-    JSlider slider = new JSlider(minValue, maxValue, supplier.get());
+  private JComponent createSliderObject(String name, Supplier<Double> supplier, Consumer<Double> consumer, Dictionary dictionary, boolean inverted, int minValue, int maxValue) {
+    JSlider slider = new JSlider(minValue, maxValue, doubleToInt(supplier.get()));
     slider.setInverted(inverted);
     if (dictionary != null) {
       slider.setLabelTable(dictionary);
       slider.setPaintLabels(true);
     }
-    validatorList.add(new IntegerValidator(slider::getValue, minValue, maxValue, name));
+    validatorList.add(new NumericValidator(slider::getValue, minValue, maxValue, name));
 
     JPanel panel = new JPanel(new FlowLayout());
     panel.add(new JLabel(name));
     panel.add(slider);
     onSave.add(s -> {
       try {
-        consumer.accept(slider.getValue());
+        log.info("slider value: " + slider.getValue());
+        consumer.accept(doubleFromInt(slider.getValue()));
       } catch (Exception e) {
         errors.setText(errors.getText() + "\n" + name + " " + e.getMessage());
       }
     });
     return panel;
+  }
+
+  private int doubleToInt(double value) {
+    return (int)(value * 100);
+  }
+
+  private double doubleFromInt(int value) {
+    return (double)value / 100d;
   }
 
   private void create(String name, Supplier<Integer> supplier, Consumer<Integer> consumer, int minValue, int maxValue) {
@@ -107,7 +120,7 @@ public class PreferencesPanel extends JPanel {
 
   private JComponent createInputField(String name, Supplier<Integer> supplier, Consumer<Integer> consumer, int minValue, int maxValue) {
     JTextField field = new JTextField(String.valueOf(supplier.get()), 5);
-    validatorList.add(new IntegerValidator(() -> Integer.parseInt(field.getText()), minValue, maxValue, name));
+    validatorList.add(new NumericValidator(() -> Integer.parseInt(field.getText()), minValue, maxValue, name));
 
     JPanel panel = new JPanel(new FlowLayout());
     panel.add(new JLabel(name));
@@ -122,10 +135,10 @@ public class PreferencesPanel extends JPanel {
     return panel;
   }
 
-  public Hashtable<Integer, JLabel> getDemultiplierDictionary(int min, int max) {
+  public Hashtable<Integer, JLabel> getMultiplierDictionary(int min, int max) {
     Hashtable<Integer, JLabel> table = new Hashtable<>();
-    table.put(min, new JLabel("more"));
-    table.put(max, new JLabel("less"));
+    table.put(min, new JLabel("less"));
+    table.put(max, new JLabel("more"));
     return table;
   }
 }
