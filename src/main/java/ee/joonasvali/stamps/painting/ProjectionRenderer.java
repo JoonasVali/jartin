@@ -6,75 +6,60 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProjectionRenderer {
+  private static final int NUMBER_OF_PROJECTIONS_TO_PREPARE = 10;
   private static Logger log = LoggerFactory.getLogger(ProjectionRenderer.class);
   private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
   private static ExecutorService multiThreadExecutor = Executors.newFixedThreadPool(AVAILABLE_PROCESSORS);
+  private ArrayList<Future> futures;
+  private final ArrayBlockingQueue<Projection> projections = new ArrayBlockingQueue<>(NUMBER_OF_PROJECTIONS_TO_PREPARE);
+  private final AtomicInteger remainingInQueue = new AtomicInteger();
 
-  private final int processors;
+  public void start(InterruptibleSupplier<Projection> projectionSupplier, int projectionCount, ProgressCounter counter) {
+    remainingInQueue.set(projectionCount);
 
-  public ProjectionRenderer() {
-    this(AVAILABLE_PROCESSORS);
-  }
-
-  public ProjectionRenderer(int threads) {
-    this.processors = threads;
-  }
-
-  public List<Projection> render(InterruptibleSupplier<Projection> projectionSupplier, int projections, ProgressCounter counter) throws InterruptedException {
-    List<Projection> projectionList = Collections.synchronizedList(new ArrayList<>());
-    if (processors <= 1) {
-      // SINGLETHREADED LOGIC
-      for (int i = 0; i < projections; i++) {
-        if (Thread.currentThread().isInterrupted()) {
-          log.info("Rendering cancelled.");
-          throw new InterruptedException();
-        }
-        projectionList.add(projectionSupplier.get());
+    Runnable internalRunnable = () -> {
+      try {
+        projections.put(projectionSupplier.get());
+        remainingInQueue.decrementAndGet();
+      } catch (InterruptedException e) {
+        log.info("Projection interrupted.");
+      } finally {
         counter.increase();
       }
-    } else {
-      // MULTITHREADED LOGIC
-      CountDownLatch latch = new CountDownLatch(projections);
+    };
 
-      Runnable internalRunnable = () -> {
-        try {
-          projectionList.add(projectionSupplier.get());
-        } catch (InterruptedException e) {
-          log.info("Projection interrupted.");
-        } finally {
-          counter.increase();
-          latch.countDown();
-        }
-      };
-
-      ArrayList<Future> futures = new ArrayList<>(projections);
-      for (int i = 0; i < projections; i++) {
-        futures.add(multiThreadExecutor.submit(internalRunnable));
-      }
-
-      try {
-        latch.await();
-      } catch (InterruptedException e) {
-        for(Future future : futures) {
-          if(!future.isDone() && !future.isCancelled()) {
-            future.cancel(true);
-          }
-        }
-        log.info("Rendering cancelled.");
-        futures.clear();
-        throw e;
-      }
+    futures = new ArrayList<>(projectionCount);
+    for (int i = 0; i < projectionCount; i++) {
+      futures.add(multiThreadExecutor.submit(internalRunnable));
     }
-
-    return projectionList;
   }
 
+  public void cancel() {
+    for(Future future : futures) {
+      if(!future.isDone() && !future.isCancelled()) {
+        future.cancel(true);
+      }
+    }
+    log.info("Rendering cancelled.");
+    futures.clear();
+  }
+
+  public boolean hasNext() {
+    return remainingInQueue.get() > 0 || projections.size() > 0;
+  }
+
+  public Projection next() throws InterruptedException {
+    if (!hasNext()) {
+      throw new NoSuchElementException();
+    }
+    return projections.take();
+  }
 }

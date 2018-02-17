@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 /**
  * @author Joonas Vali
@@ -24,22 +23,23 @@ public class Painting {
   private static final Logger log = LoggerFactory.getLogger(Painting.class);
   private static final RandomQuery<Color> colorChooser = RandomQuery.create();
 
-  private final List<Projection> renderedProjections;
+  private final ProjectionRenderer renderer;
   private final BufferedImage canvas;
   private final int width, height;
   private final ColorModel backgroundColorModel;
 
-  public Painting(int width, int height, ColorModel backgroundColorModel, List<Projection> renderedProjections) {
+  public Painting(int width, int height, ColorModel backgroundColorModel, ProjectionRenderer renderer) {
     this.width = width;
     this.height = height;
-    this.renderedProjections = renderedProjections;
+    this.renderer = renderer;
     this.backgroundColorModel = backgroundColorModel;
     canvas = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
   }
 
   public BufferedImage paint(ProgressCounter counter) throws InterruptedException {
     paintBackground();
-    for (Projection projection : renderedProjections) {
+    while (renderer.hasNext()) {
+      Projection projection = renderer.next();
       if (Thread.currentThread().isInterrupted()) {
         counter.clear();
         throw new InterruptedException();

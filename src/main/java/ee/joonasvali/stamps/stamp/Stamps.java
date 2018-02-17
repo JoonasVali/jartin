@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * @author Joonas Vali
  */
-public class Stamps implements StampProvider{
+public class Stamps implements StampProvider {
   public static final Logger log = LoggerFactory.getLogger(Stamps.class);
   private final File folder;
   private volatile ArrayList<Stamp> stamps;

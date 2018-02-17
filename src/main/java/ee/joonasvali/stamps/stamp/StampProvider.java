@@ -12,7 +12,7 @@ import java.util.List;
  * @author Joonas Vali
  */
 public interface StampProvider {
-  public Stamp getStamp(Query<Stamp> q);
+  Stamp getStamp(Query<Stamp> q);
   List<Stamp> getStamps();
-  public int size();
+  int size();
 }

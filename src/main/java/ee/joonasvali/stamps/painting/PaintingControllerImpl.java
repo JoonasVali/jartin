@@ -4,7 +4,6 @@
 
 package ee.joonasvali.stamps.painting;
 
-import ee.joonasvali.stamps.Projection;
 import ee.joonasvali.stamps.ProjectionGenerator;
 import ee.joonasvali.stamps.color.ColorModel;
 import ee.joonasvali.stamps.color.ColorUtil;
@@ -36,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -60,6 +58,7 @@ public final class PaintingControllerImpl implements PaintingController {
   private volatile boolean retainSpine = false;
 
   private final StampLoader stampPool = new StampLoader(AppProperties.getInstance().getStampsDir());
+  private final ProjectionRenderer projectionRenderer;
 
   private volatile ColorModel backgroundColorModel;
   private volatile Pallette pallette;
@@ -68,8 +67,6 @@ public final class PaintingControllerImpl implements PaintingController {
   private volatile Query<Stamp> stampQuery;
   private volatile Query<ColorModel> colorModelQuery;
   private volatile Query<Color> colorQuery;
-
-  private final ProjectionRenderer projectionRenderer;
 
   public PaintingControllerImpl(BinaryFormulaGenerator colorModelFormulaGenerator, BinaryFormulaGenerator stampFormulaGenerator, BinaryFormulaGenerator colorFormulaGenerator) {
     this.colorModelFormulaGenerator = colorModelFormulaGenerator;
@@ -145,8 +142,8 @@ public final class PaintingControllerImpl implements PaintingController {
     if (!showSpine) {
       try {
         log.info("Start painting.");
-        List<Projection> projectionList = projectionRenderer.render(() -> gen.generate(stampQuery, colorModelQuery, colorQuery), projections, counter);
-        Painting painting = new Painting(x, y, backgroundColorModel, projectionList);
+        projectionRenderer.start(() -> gen.generate(stampQuery, colorModelQuery, colorQuery), projections, counter);
+        Painting painting = new Painting(x, y, backgroundColorModel, projectionRenderer);
 
         BufferedImage result = painting.paint(counter);
         long endTime = System.currentTimeMillis();
@@ -155,6 +152,7 @@ public final class PaintingControllerImpl implements PaintingController {
       }
       catch (InterruptedException e) {
         log.info("No image available. Painting cancelled.");
+        projectionRenderer.cancel();
         counter.clear();
         backup.revert();
         return Optional.empty();
