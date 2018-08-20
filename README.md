@@ -38,10 +38,10 @@ should then contain the fully compiled app.
 
 ## Resolve copyright problems ##
 
-If Jartin stamps contain any of your brushes/stencils and you are not happy that they are being used here,
+If Jartin stamp folders contain any of your brushes/stencils and you are not happy that they are being used here,
 then please let me know and I'll remove them.
 
 
 ## License ##
 
-Jartin is licensed under GNU GPLv3 [link](https://github.com/JoonasVali/jartin/blob/master/license.txt)
+Jartin is licenced under GNU GPLv3 [link](https://github.com/JoonasVali/jartin/blob/master/license.txt)
