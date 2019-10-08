@@ -6,6 +6,7 @@ package ee.joonasvali.stamps.ui;
 
 import ee.joonasvali.stamps.code.Util;
 import ee.joonasvali.stamps.meta.Metadata;
+import ee.joonasvali.stamps.painting.PaintingController;
 import ee.joonasvali.stamps.painting.PaintingControllerImpl;
 import ee.joonasvali.stamps.properties.AppProperties;
 import ee.joonasvali.stamps.query.DefaultBinaryFormulaGenerator;
@@ -29,6 +30,8 @@ public class Main {
   private volatile PaintingUI ui;
   private volatile AppProperties properties = AppProperties.getInstance();
 
+  private JButton colorSettings;
+
   public static void main(String[] args) throws InvocationTargetException, InterruptedException {
     SwingUtilities.invokeAndWait(() -> new Main().run());
   }
@@ -45,7 +48,8 @@ public class Main {
     progressBar.setStringPainted(true);
     ProgressBarUpdateUtility progressUtility = new ProgressBarUpdateUtility(progressBar);
 
-    ui = new PaintingUI(new PaintingControllerImpl(new DefaultBinaryFormulaGenerator(), new DefaultBinaryFormulaGenerator(), new DefaultBinaryFormulaGenerator()), progressUtility);
+    PaintingController controller = new PaintingControllerImpl(new DefaultBinaryFormulaGenerator(), new DefaultBinaryFormulaGenerator(), new DefaultBinaryFormulaGenerator());
+    ui = new PaintingUI(controller, progressUtility);
     JScrollPane scrollPane = new JScrollPane(ui, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     HandScrollListener scrollListener = new HandScrollListener(ui);
     scrollPane.getViewport().addMouseMotionListener(scrollListener);
@@ -55,18 +59,30 @@ public class Main {
     frame.setFocusable(true);
     frame.setAutoRequestFocus(true);
 
-
-
     JPanel controlPanel = new JPanel(new FlowLayout());
     JButton settings = new JButton("Preferences");
+    colorSettings = new JButton("Color Settings");
+    colorSettings.setEnabled(false);
+
+    controlPanel.add(colorSettings);
     controlPanel.add(settings);
-    JCheckBox box1 = new JCheckBox("Reuse color", false);
+
+    JCheckBox box1 = new JCheckBox("Control color", false);
     JCheckBox box2 = new JCheckBox("Reuse brushes", false);
     JCheckBox box3 = new JCheckBox("Reuse spine", false);
 
     box1.addActionListener(getBoxActionListener(box1, ui::setRetainColors));
     box2.addActionListener(getBoxActionListener(box2, ui::setRetainStamps));
     box3.addActionListener(getBoxActionListener(box3, ui::setRetainSpine));
+
+    box1.addActionListener(e -> colorSettings.setEnabled(box1.isSelected()));
+
+    colorSettings.addActionListener((e) -> new ColorSettingsPanel(
+        controller::getPallette,
+        controller::setPallette,
+        controller::getBackgroundColorModel,
+        controller::setBackgroundColorModel
+    ).showInFrame());
 
     settings.addActionListener(s -> openSettings());
 

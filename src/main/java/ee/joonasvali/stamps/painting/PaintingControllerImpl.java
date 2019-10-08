@@ -44,8 +44,8 @@ import java.util.Random;
 public final class PaintingControllerImpl implements PaintingController {
 
   public static final double CONSTANT_STAMP_COUNT_DIVIDER = 0.001d;
-  private static Logger log = LoggerFactory.getLogger(PaintingControllerImpl.class);
   private static final double CHANCE_OF_GRADIENT_COLOR = 0.7;
+  private static Logger log = LoggerFactory.getLogger(PaintingControllerImpl.class);
   private static RandomQuery<ColorModel> backgroundColorModelChooser = RandomQuery.create();
 
   private final Preferences prefs = new Preferences();
@@ -206,12 +206,28 @@ public final class PaintingControllerImpl implements PaintingController {
 
     for (int i = 0; i < colors; i++) {
       if (Math.random() < CHANCE_OF_GRADIENT_COLOR) {
-        colorModels.add(new GradientColorModel(ColorUtil.getRandomColor(random), ColorUtil.getRandomColor(random), prefs.getHeight(), prefs.getWidth()));
+        colorModels.add(new GradientColorModel(ColorUtil.getRandomColor(random), ColorUtil.getRandomColor(random)));
       } else {
         colorModels.add(new PlainColorModel(ColorUtil.getRandomColor(random)));
       }
     }
     return colorModels;
+  }
+
+  public ColorModel getBackgroundColorModel() {
+    return backgroundColorModel;
+  }
+
+  public Pallette getPallette() {
+    return pallette;
+  }
+
+  public void setBackgroundColorModel(ColorModel backgroundColorModel) {
+    this.backgroundColorModel = backgroundColorModel;
+  }
+
+  public void setPallette(Pallette pallette) {
+    this.pallette = pallette;
   }
 
   @Override

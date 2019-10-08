@@ -60,7 +60,7 @@ public class Painting {
 
       for (int i = 0; i < this.width; i++) {
         for (int j = 0; j < this.height; j++) {
-          canvas.setRGB(i, j, bgColor.getColor(i, j).getRGB());
+          canvas.setRGB(i, j, bgColor.getColor(i, j, width, height).getRGB());
         }
       }
     } else {

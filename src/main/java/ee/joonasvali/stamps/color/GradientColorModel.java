@@ -14,20 +14,23 @@ import java.awt.*;
 public class GradientColorModel implements PositionAwareColorModel {
   private final Color upper;
   private final Color lower;
-  private final int height;
-  // currently unused
-  private final int width;
 
-  public GradientColorModel(Color upper, Color lower, int height, int width) {
+  public GradientColorModel(Color upper, Color lower) {
     this.upper = upper;
     this.lower = lower;
-    this.height = height;
-    this.width = width;
   }
 
   @Override
   public PositionAwareColor getColor() {
     return new GradientColor(lower, upper);
+  }
+
+  public Color getUpper() {
+    return upper;
+  }
+
+  public Color getLower() {
+    return lower;
   }
 
   @Override
@@ -46,8 +49,8 @@ public class GradientColorModel implements PositionAwareColorModel {
     }
 
     @Override
-    public Color getColor(int x, int y) {
-      double ratio = (double)y / (double)height;
+    public Color getColor(int x, int y, int imageWidth, int imageHeight) {
+      double ratio = (double)y / (double)imageHeight;
       return blend(lower, upper, ratio);
 
 //      int anti = 100 - yPercentage;

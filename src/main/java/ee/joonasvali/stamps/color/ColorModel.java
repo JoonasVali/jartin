@@ -12,5 +12,5 @@ import java.awt.*;
  * @author Joonas Vali
  */
 public interface ColorModel {
-  public Color getColor(Query<Color> query);
+  Color getColor(Query<Color> query);
 }

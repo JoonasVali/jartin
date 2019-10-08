@@ -7,6 +7,7 @@ package ee.joonasvali.stamps.color;
 import ee.joonasvali.stamps.query.Query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,10 +17,16 @@ public class Pallette {
   private final List<ColorModel> colors;
 
   public Pallette(List<ColorModel> colorModels) {
-    this.colors = new ArrayList<>(colorModels);
+    this.colors = Collections.synchronizedList(new ArrayList<>(colorModels));
   }
 
   public ColorModel getColor(Query<ColorModel> q) {
     return q.get(colors);
+  }
+
+  public List<ColorModel> getModels() {
+    synchronized (colors) {
+      return new ArrayList<>(colors);
+    }
   }
 }

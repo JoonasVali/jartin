@@ -39,6 +39,6 @@ public abstract class PositionAwareColor extends Color {
     super(cspace, components, alpha);
   }
 
-  public abstract Color getColor(int x, int y);
+  public abstract Color getColor(int x, int y, int imageWidth, int imageHeight);
 
 }

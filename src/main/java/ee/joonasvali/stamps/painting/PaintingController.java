@@ -1,5 +1,7 @@
 package ee.joonasvali.stamps.painting;
 
+import ee.joonasvali.stamps.color.ColorModel;
+import ee.joonasvali.stamps.color.Pallette;
 import ee.joonasvali.stamps.ui.Preferences;
 import ee.joonasvali.stamps.ui.ProgressListener;
 
@@ -16,6 +18,14 @@ public interface PaintingController {
   void clearCaches();
 
   Optional<BufferedImage> generateImage(ProgressListener listener);
+
+  ColorModel getBackgroundColorModel();
+
+  Pallette getPallette();
+
+  void setBackgroundColorModel(ColorModel backgroundColorModel);
+
+  void setPallette(Pallette pallette);
 
   Preferences getPrefs();
 }

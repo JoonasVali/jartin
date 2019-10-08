@@ -57,7 +57,7 @@ public class DefaultProjectionFactory implements ProjectionFactory {
           // Transparent
           newImg.setRGB(j, i, 0);
         } else {
-          Color awareColor = color.getColor(x + j, y + i);
+          Color awareColor = color.getColor(x + j, y + i, newImg.getWidth(), newImg.getHeight());
           int alpha = 255 - (red + green + blue) / 3;
           Color c = new Color(awareColor.getRed(), awareColor.getGreen(), awareColor.getBlue(), alpha);
           newImg.setRGB(j, i, c.getRGB());

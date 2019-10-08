@@ -41,8 +41,6 @@ public class PaintingUI extends JPanel {
     this.add(new JLabel(new ImageIcon(lastImage)));
   }
 
-
-
   private void initEmpty() {
     log.debug("Start initializing PaintingUI");
     lastImage = new BufferedImage(getPrefs().getWidth(), getPrefs().getHeight(), BufferedImage.TYPE_INT_RGB);
